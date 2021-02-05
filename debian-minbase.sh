@@ -194,21 +194,27 @@ mmdebstrap \
   --aptopt="$apt_opt_script" \
   --dpkgopt="$dpkg_opt_script" \
   --customize-hook="$chroot_postsetup_script \"\$1\" \"$image\"" \
-  $suite "$tarball"
+  $suite "$tarball" || true
 
 rm -f "$dpkg_opt_script" "$apt_opt_script" "$chroot_postsetup_script"
 unset dpkg_opt_script apt_opt_script chroot_postsetup_script
 
+tar -tf "$tarball" >/dev/null
+
 ## populate image name with arch
 image="$image-$arch"
 
-k=$(podman import "$tarball" "$image-wip:$tag")
-[ -n "$k" ]
+k=$(podman import "$tarball" "$image-wip:$tag" || true)
 
 rm -f "$tarball" ; unset tarball
 
-c=$(buildah from --format docker --pull-never --security-opt=label=disable,seccomp=unconfined,apparmor=unconfined --net host --uts container "$k")
-[ -n "$c" ]
+[ -n "$k" ]
+
+c=$(buildah from --format docker --pull-never --net host --uts container --security-opt=label=disable,seccomp=unconfined,apparmor=unconfined "$k" || true)
+if [ -z "$c" ] ; then
+	podman image rm "$k"
+	exit 1
+fi
 
 buildah config --hostname debian "$c"
 buildah config --comment "basic Debian image" "$c"
@@ -228,3 +234,5 @@ podman image tag "$image:$tag" "$image"
 
 buildah rm "$c"
 podman image rm "$k"
+
+echo "$image has been built successfully"
