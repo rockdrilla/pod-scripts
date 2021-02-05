@@ -1,6 +1,7 @@
 #!/bin/sh
 # SPDX-License-Identifier: BSD-3-Clause
 # (c) 2021, Konstantin Demin
+set -e
 
 suite=sid
 pkg_aux='apt-utils aptitude gawk less lsof vim-tiny'
@@ -101,7 +102,6 @@ cat <<-'EOZ'
 		#!/bin/sh
 		# SPDX-License-Identifier: BSD-3-Clause
 		# (c) 2021, Konstantin Demin
-
 		set -e
 
 		## remove apt cache and lists
@@ -196,17 +196,19 @@ mmdebstrap \
   --customize-hook="$chroot_postsetup_script \"\$1\" \"$image\"" \
   $suite "$tarball"
 
-rm "$dpkg_opt_script" "$apt_opt_script" "$chroot_postsetup_script"
+rm -f "$dpkg_opt_script" "$apt_opt_script" "$chroot_postsetup_script"
 unset dpkg_opt_script apt_opt_script chroot_postsetup_script
 
 ## populate image name with arch
 image="$image-$arch"
 
 k=$(podman import "$tarball" "$image-wip:$tag")
+[ -n "$k" ]
 
-rm "$tarball" ; unset tarball
+rm -f "$tarball" ; unset tarball
 
 c=$(buildah from --format docker --pull-never --security-opt=label=disable,seccomp=unconfined,apparmor=unconfined --net host --uts container "$k")
+[ -n "$c" ]
 
 buildah config --hostname debian "$c"
 buildah config --comment "basic Debian image" "$c"
