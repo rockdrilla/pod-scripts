@@ -5,8 +5,22 @@ set -e
 
 suite=sid
 pkg_aux='apt-utils aptitude gawk less lsof vim-tiny'
-arch=$(dpkg --print-architecture)
 image="debian-minbase-$suite"
+
+arch=$(dpkg --print-architecture)
+
+self_upstream='https://github.com/rockdrilla/pod-scripts/debian-minbase.sh'
+own_ver() {
+	local d=$(dirname "$0")
+	git -C "$d" rev-parse --short HEAD 2>/dev/null || return 0
+}
+self_version=$(own_ver "$0")
+
+pkg_ver() { dpkg-query --showformat='${Version}' --show "$1"; }
+mmdebstrap_version=$(pkg_ver mmdebstrap)
+buildah_version=$(pkg_ver buildah)
+podman_version=$(pkg_ver podman)
+
 
 ts=$(date '+%s')
 export SOURCE_DATE_EPOCH=$ts
@@ -218,6 +232,11 @@ fi
 
 buildah config --hostname debian "$c"
 buildah config --comment "basic Debian image" "$c"
+buildah config --label "unix_timestamp=$ts" "$c"
+buildah config --label "script=$self_upstream${self_version:+@$self_version}" "$c"
+buildah config --label "mmdebstrap=$mmdebstrap_version" "$c"
+buildah config --label "podman=$podman_version" "$c"
+buildah config --label "buildah=$buildah_version" "$c"
 buildah config --onbuild="RUN sh /.cleanup.sh" "$c"
 buildah config --env LANG=C.UTF-8 "$c"
 buildah config --env LC_ALL=C.UTF8 "$c"
