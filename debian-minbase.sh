@@ -224,7 +224,7 @@ rm -f "$tarball" ; unset tarball
 
 [ -n "$k" ]
 
-c=$(buildah from --format docker --pull-never --net host --uts container --security-opt=label=disable,seccomp=unconfined,apparmor=unconfined "$k" || true)
+c=$(buildah from --format docker --pull-never "$k" || true)
 if [ -z "$c" ] ; then
 	podman image rm "$k" || true
 	exit 1
