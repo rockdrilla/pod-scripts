@@ -218,7 +218,7 @@ tar -tf "$tarball" >/dev/null
 ## populate image name with arch
 image="$image-$arch"
 
-k=$(podman import "$tarball" "$image-wip:$tag" || true)
+k=$(podman import "$tarball" "$image-temporary:$tag" || true)
 
 rm -f "$tarball" ; unset tarball
 
@@ -226,7 +226,7 @@ rm -f "$tarball" ; unset tarball
 
 c=$(buildah from --format docker --pull-never --net host --uts container --security-opt=label=disable,seccomp=unconfined,apparmor=unconfined "$k" || true)
 if [ -z "$c" ] ; then
-	podman image rm "$k"
+	podman image rm "$k" || true
 	exit 1
 fi
 
@@ -246,10 +246,10 @@ buildah config --env TMP=/tmp "$c"
 buildah config --env TEMPDIR=/tmp "$c"
 buildah config --env TEMP=/tmp "$c"
 
-buildah commit --format docker --squash --timestamp $ts "$c" "$image:$tag"
-
-podman image rm "$image:latest" || true
-podman image tag "$image:$tag" "$image"
+if buildah commit --format docker --squash --timestamp $ts "$c" "$image:$tag" ; then
+	podman image rm "$image:latest" || true
+	podman image tag "$image:$tag" "$image"
+fi
 
 buildah rm "$c"
 podman image rm "$k"
