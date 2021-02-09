@@ -4,7 +4,7 @@
 set -e
 
 suite=sid
-pkg_aux='apt-utils aptitude gawk less lsof vim-tiny'
+pkg_aux='apt-utils aptitude e-wrapper gawk less lsof vim-tiny'
 image="debian-minbase-$suite"
 
 arch=$(dpkg --print-architecture)
@@ -75,6 +75,10 @@ cat <<-'EOZ'
 	## always report that we're in chroot (oh God, who's still using ischroot?..)
 	chroot "$1" dpkg-divert --divert /usr/bin/ischroot.debianutils --rename /usr/bin/ischroot
 	ln -s /bin/true "$1/usr/bin/ischroot"
+
+	## install vim-tiny as variant for vim
+	vim=/usr/bin/vim
+	chroot "$1" update-alternatives --install $vim vim $vim.tiny 1
 
 	## configure debconf:
 	## - never update man-db
@@ -240,6 +244,8 @@ buildah config --label "buildah=$buildah_version" "$c"
 buildah config --onbuild="RUN sh /.cleanup.sh" "$c"
 buildah config --env LANG=C.UTF-8 "$c"
 buildah config --env LC_ALL=C.UTF8 "$c"
+buildah config --env VISUAL=/usr/bin/sensible-editor "$c"
+buildah config --env EDITOR=/usr/bin/sensible-editor "$c"
 buildah config --env TERM=xterm-256color "$c"
 buildah config --env TMPDIR=/tmp "$c"
 buildah config --env TMP=/tmp "$c"
