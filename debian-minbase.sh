@@ -48,28 +48,28 @@ cat <<-'EOZ'
 
 	## setup repo priorities
 	cat >"$1/etc/apt/preferences.d/00-local" <<EOF
-	Package: *
-	Pin: release o=debian, a=unstable
-	Pin-Priority: 700
+		Package: *
+		Pin: release o=debian, a=unstable
+		Pin-Priority: 700
 
-	Package: *
-	Pin: release o=debian, a=testing
-	Pin-Priority: 650
+		Package: *
+		Pin: release o=debian, a=testing
+		Pin-Priority: 650
 
-	Package: *
-	Pin: release o=debian, a=stable
-	Pin-Priority: 600
+		Package: *
+		Pin: release o=debian, a=stable
+		Pin-Priority: 600
 
-	Package: *
-	Pin: release o=debian, a=experimental
-	Pin-Priority: 550
+		Package: *
+		Pin: release o=debian, a=experimental
+		Pin-Priority: 550
 	EOF
 	chmod 0644 "$1/etc/apt/preferences.d/00-local"
 
 	## prevent services from auto-starting
 	cat > "$1/usr/sbin/policy-rc.d" <<-'EOF'
-	#!/bin/sh
-	exit 101
+		#!/bin/sh
+		exit 101
 	EOF
 	chmod 0755 "$1/usr/sbin/policy-rc.d"
 
