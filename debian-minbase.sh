@@ -5,6 +5,7 @@ set -e
 
 suite=sid
 pkg_aux='apt-utils aptitude e-wrapper gawk less lsof vim-tiny'
+pkg_auto='bash-completion dialog'
 image="debian-minbase-$suite"
 
 arch=$(dpkg --print-architecture)
@@ -208,7 +209,7 @@ mmdebstrap \
   --verbose \
   --format=tar \
   --variant=minbase \
-  --include="$pkg_aux" \
+  --include="$pkg_aux $pkg_auto" \
   --aptopt="$apt_opt_script" \
   --dpkgopt="$dpkg_opt_script" \
   --customize-hook="$chroot_postsetup_script \"\$1\" \"$image\"" \
