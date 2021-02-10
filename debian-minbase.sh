@@ -172,8 +172,6 @@ EOZ
 } > "$chroot_postsetup_script"
 chmod 0755 "$chroot_postsetup_script"
 
-cat >/dev/null <<-'EOZ'
-EOZ
 dpkg_opt_script=$(mktemp)
 cat >"$dpkg_opt_script" <<-'EOZ'
 	force-unsafe-io
