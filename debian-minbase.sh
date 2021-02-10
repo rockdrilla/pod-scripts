@@ -197,7 +197,7 @@ apt_opt_script=$(mktemp)
 cat >"$apt_opt_script" <<-'EOZ'
 	APT::Sandbox::User "root";
 
-	APT::Install-Recommends "0";
+	APT::Install-Recommends "false";
 
 	Acquire::Languages "none";
 
