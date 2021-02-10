@@ -152,18 +152,18 @@ cat <<-'EOZ'
 
 EOZ
 ## refresh aptitude/apt data
-cat <<-EOZ
-	## mark almost all packages as auto-installed and remove unneeded
-	chroot "\$1" aptitude update
-	chroot "\$1" aptitude forget-new
-	chroot "\$1" aptitude --schedule-only hold $pkg_aux
-	chroot "\$1" aptitude --schedule-only markauto '~i!~E!~M'
-	chroot "\$1" aptitude --schedule-only unmarkauto $pkg_aux
-	chroot "\$1" aptitude --schedule-only unhold $pkg_aux
-	chroot "\$1" aptitude --assume-yes install
-	chroot "\$1" aptitude clean
-
-EOZ
+{ cat <<-EOF
+	update
+	forget-new
+	--schedule-only hold $pkg_aux
+	--schedule-only markauto '~i!~E!~M'
+	--schedule-only unmarkauto $pkg_aux
+	--schedule-only unhold $pkg_aux
+	--assume-yes install
+EOF
+} | sed -E 's/^/aptitude /' | paste -sd';' \
+  | sed -E 's/^(.*)$/\1;apt-cache gencaches/' \
+  | sed -E 's/^(.*)$/chroot "$1" sh -e -c "\1"/'
 ## cleanup
 cat <<-'EOZ'
 	## run cleanup
