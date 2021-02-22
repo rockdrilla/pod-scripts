@@ -122,6 +122,7 @@ cat <<-'EOZ'
 		# SPDX-License-Identifier: BSD-3-Clause
 		# (c) 2021, Konstantin Demin
 		set -e
+		set -x -v
 
 		## remove apt cache and lists
 		for i in /var/lib/apt/lists /var/cache/apt/archives ; do
@@ -167,7 +168,7 @@ EOF
 ## cleanup
 cat <<-'EOZ'
 	## run cleanup
-	chroot "$1" sh -x -v /.cleanup.sh
+	chroot "$1" sh /.cleanup.sh
 EOZ
 } > "$chroot_postsetup_script"
 chmod 0755 "$chroot_postsetup_script"
@@ -240,7 +241,10 @@ buildah config --label "script=$self_upstream${self_version:+@$self_version}" "$
 buildah config --label "mmdebstrap=$mmdebstrap_version" "$c"
 buildah config --label "podman=$podman_version" "$c"
 buildah config --label "buildah=$buildah_version" "$c"
-buildah config --onbuild="RUN sh /.cleanup.sh" "$c"
+buildah config --onbuild="RUN : please issue 'sh /.cleanup.sh'" "$c"
+buildah config --onbuild="RUN : as last RUN command in your images" "$c"
+buildah config --onbuild="RUN : and consider keeping these hints" "$c"
+buildah config --onbuild="RUN : within ONBUILD RUN further" "$c"
 buildah config --env LANG=C.UTF8 "$c"
 buildah config --env LC_ALL=C.UTF-8 "$c"
 buildah config --env VISUAL=/usr/bin/sensible-editor "$c"
