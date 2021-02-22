@@ -234,28 +234,30 @@ if [ -z "$c" ] ; then
 	exit 1
 fi
 
-buildah config --hostname debian "$c"
-buildah config --comment "basic Debian image" "$c"
-buildah config --author "contact @ $repo_contact" "$c"
-buildah config --created-by "$self_upstream${self_version:+ @$self_version}" "$c"
-buildah config --label "unix_timestamp=$ts" "$c"
-buildah config --label "mmdebstrap=$mmdebstrap_version" "$c"
-buildah config --label "podman=$podman_version" "$c"
-buildah config --label "buildah=$buildah_version" "$c"
-buildah config --onbuild="RUN : please issue 'sh /.cleanup.sh'" "$c"
-buildah config --onbuild="RUN : as last RUN command in your images" "$c"
-buildah config --onbuild="RUN : and consider keeping these hints" "$c"
-buildah config --onbuild="RUN : within ONBUILD RUN further" "$c"
-buildah config --env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin "$c"
-buildah config --env LANG=C.UTF8 "$c"
-buildah config --env LC_ALL=C.UTF-8 "$c"
-buildah config --env VISUAL=/usr/bin/sensible-editor "$c"
-buildah config --env EDITOR=/usr/bin/sensible-editor "$c"
-buildah config --env TERM=xterm "$c"
-buildah config --env TMPDIR=/tmp "$c"
-buildah config --env TMP=/tmp "$c"
-buildah config --env TEMPDIR=/tmp "$c"
-buildah config --env TEMP=/tmp "$c"
+f=$(printf 'bc() { buildah config "$@" %s ; }' "$c") ; eval "$f"
+
+bc --hostname debian
+bc --comment "basic Debian image"
+bc --author "contact @ $repo_contact"
+bc --created-by "$self_upstream${self_version:+ @$self_version}"
+bc --label "unix_timestamp=$ts"
+bc --label "mmdebstrap=$mmdebstrap_version"
+bc --label "podman=$podman_version"
+bc --label "buildah=$buildah_version"
+bc --onbuild="RUN : please issue 'sh /.cleanup.sh'"
+bc --onbuild="RUN : as last RUN command in your images"
+bc --onbuild="RUN : and consider keeping these hints"
+bc --onbuild="RUN : within ONBUILD RUN further"
+bc --env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+bc --env LANG=C.UTF8
+bc --env LC_ALL=C.UTF-8
+bc --env VISUAL=/usr/bin/sensible-editor
+bc --env EDITOR=/usr/bin/sensible-editor
+bc --env TERM=xterm
+bc --env TMPDIR=/tmp
+bc --env TMP=/tmp
+bc --env TEMPDIR=/tmp
+bc --env TEMP=/tmp
 
 if buildah commit --format docker --squash --timestamp $ts "$c" "$image:$tag" ; then
 	podman image rm "$image:latest" || true
