@@ -222,9 +222,6 @@ unset dpkg_opt_script apt_opt_script chroot_postsetup_script
 
 tar -tf "$tarball" >/dev/null
 
-## populate image name with arch
-image="$image"
-
 k=$(podman import "$tarball" "$image-temporary:$tag" || true)
 
 rm -f "$tarball" ; unset tarball
