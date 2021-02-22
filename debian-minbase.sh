@@ -228,7 +228,9 @@ rm -f "$tarball" ; unset tarball
 
 [ -n "$k" ]
 
-c=$(buildah from --format docker --pull-never "$k" || true)
+export BUILDAH_FORMAT=docker
+
+c=$(buildah from --pull-never "$k" || true)
 if [ -z "$c" ] ; then
 	podman image rm "$k" || true
 	exit 1
@@ -259,7 +261,7 @@ bc --env TMP=/tmp
 bc --env TEMPDIR=/tmp
 bc --env TEMP=/tmp
 
-if buildah commit --format docker --squash --timestamp $ts "$c" "$image:$tag" ; then
+if buildah commit --squash --timestamp $ts "$c" "$image:$tag" ; then
 	podman image rm "$image:latest" || true
 	podman image tag "$image:$tag" "$image"
 fi
