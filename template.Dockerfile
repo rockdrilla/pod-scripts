@@ -1,4 +1,5 @@
 # SPDX-License-Identifier: BSD-3-Clause
+# (c) 2021, Konstantin Demin
 
 FROM docker.io/rockdrilla/debian-minbase-sid
 
