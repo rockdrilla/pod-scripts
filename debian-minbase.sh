@@ -14,6 +14,8 @@ repo_base='https://github.com/rockdrilla/pod-scripts'
 repo_contact="$repo_base/issues/new/choose"
 self_upstream="$repo_base.git /debian-minbase.sh"
 
+sha256() { sha256sum -b "$1" | grep -Eio '^[0-9a-f]+' | tr '[A-F]' '[a-f]' ; }
+
 own_ver() {
 	local d=$(dirname "$0")
 	git -C "$d" rev-parse --short HEAD 2>/dev/null || return 0
@@ -222,7 +224,6 @@ unset dpkg_opt_script apt_opt_script chroot_postsetup_script
 
 tar -tf "$tarball" >/dev/null
 
-sha256() { sha256sum -b "$1" | grep -Eio '^[0-9a-f]+' | tr '[A-F]' '[a-f]' ; }
 tar_sha256=$(sha256 "$tarball")
 
 k=$(podman import "$tarball" "$image-temporary:$tag" || true)
