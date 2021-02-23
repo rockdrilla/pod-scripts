@@ -4,8 +4,8 @@
 set -e
 
 suite=sid
-pkg_aux='apt-utils aptitude e-wrapper gawk less lsof vim-tiny'
-pkg_auto='bash-completion dialog'
+pkg_aux='apt-utils aptitude e-wrapper less lsof vim-tiny'
+pkg_auto='dialog whiptail'
 image="debian-minbase-$suite"
 
 arch=$(dpkg --print-architecture)
