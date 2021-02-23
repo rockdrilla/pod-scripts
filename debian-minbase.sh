@@ -260,6 +260,8 @@ bc --env TMPDIR=/tmp
 bc --env TMP=/tmp
 bc --env TEMPDIR=/tmp
 bc --env TEMP=/tmp
+bc --env PAGER=less
+bc --env LESS=FRS
 
 if buildah commit --squash --timestamp $ts "$c" "$image:$tag" ; then
 	podman image rm "$image:latest" || true
