@@ -222,6 +222,9 @@ unset dpkg_opt_script apt_opt_script chroot_postsetup_script
 
 tar -tf "$tarball" >/dev/null
 
+sha256() { sha256sum -b "$1" | grep -Eio '^[0-9a-f]+' | tr '[A-F]' '[a-f]' ; }
+tar_sha256=$(sha256 "$tarball")
+
 k=$(podman import "$tarball" "$image-temporary:$tag" || true)
 
 rm -f "$tarball" ; unset tarball
@@ -246,6 +249,7 @@ bc --label "unix_timestamp=$ts"
 bc --label "mmdebstrap=$mmdebstrap_version"
 bc --label "podman=$podman_version"
 bc --label "buildah=$buildah_version"
+bc --label "tarball=$tar_sha256"
 bc --onbuild="RUN : please issue 'sh /.cleanup.sh'"
 bc --onbuild="RUN : as last RUN command in your images"
 bc --onbuild="RUN : and consider keeping these hints"
