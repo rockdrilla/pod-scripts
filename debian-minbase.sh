@@ -7,6 +7,15 @@ dir0=$(dirname "$0")
 name0=$(basename "$0")
 
 suite=unstable
+if [ -n "$1" ] ; then
+	x=$(printf '%s' "$1"  | tr -d '[a-z]' | wc -c)
+	if [ "$x" = "0" ] ; then
+		suite=$1
+	else
+		echo "parameter '$1' looks spoiled, defaulting to '$suite'" 1>&2
+	fi
+fi
+
 pkg_aux='apt-utils aptitude e-wrapper less lsof vim-tiny'
 pkg_auto='dialog whiptail'
 image="debian-minbase-$suite"
