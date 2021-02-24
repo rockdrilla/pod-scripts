@@ -3,6 +3,9 @@
 # (c) 2021, Konstantin Demin
 set -e
 
+dir0=$(dirname "$0")
+name0=$(basename "$0")
+
 suite=sid
 pkg_aux='apt-utils aptitude e-wrapper less lsof vim-tiny'
 pkg_auto='dialog whiptail'
@@ -12,13 +15,14 @@ arch=$(dpkg --print-architecture)
 
 repo_base='https://github.com/rockdrilla/pod-scripts'
 repo_contact="$repo_base/issues/new/choose"
-self_upstream="$repo_base.git /debian-minbase.sh"
+self_upstream="$repo_base.git /$name0"
 
 sha256() { sha256sum -b "$1" | grep -Eio '^[0-9a-f]+' | tr '[A-F]' '[a-f]' ; }
 
+self_sha256=$(sha256 "$0")
+
 own_ver() {
-	local d=$(dirname "$0")
-	git -C "$d" rev-parse --short HEAD 2>/dev/null || return 0
+	git -C "$dir0" log -n 1 --format=%h -- "$name0" 2>/dev/null || true
 }
 self_version=$(own_ver "$0")
 
@@ -244,8 +248,10 @@ f=$(printf 'bc() { buildah config "$@" %s ; }' "$c") ; eval "$f"
 
 bc --hostname debian
 bc --comment "basic Debian image"
-bc --author "contact @ $repo_contact"
-bc --created-by "$self_upstream${self_version:+ @$self_version}"
+bc --label "build.script.commit=${self_version:-none}"
+bc --label "build.script.contact=$repo_contact"
+bc --label "build.script.hash=$self_sha256"
+bc --label "build.script.source=$self_upstream"
 bc --label "build.ts=$ts"
 bc --label "debian.buildah=$buildah_version"
 bc --label "debian.mmdebstrap=$mmdebstrap_version"
