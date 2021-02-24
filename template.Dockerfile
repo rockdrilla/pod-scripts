@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # (c) 2021, Konstantin Demin
 
-FROM docker.io/rockdrilla/debian-minbase-sid
+FROM docker.io/rockdrilla/debian-minbase-unstable
 
 ONBUILD RUN : please issue 'sh /.cleanup.sh'
 ONBUILD RUN : as last RUN command in your images

@@ -6,7 +6,7 @@ set -e
 dir0=$(dirname "$0")
 name0=$(basename "$0")
 
-suite=sid
+suite=unstable
 pkg_aux='apt-utils aptitude e-wrapper less lsof vim-tiny'
 pkg_auto='dialog whiptail'
 image="debian-minbase-$suite"
