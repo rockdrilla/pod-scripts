@@ -8,6 +8,10 @@ ONBUILD RUN : as last RUN command in your images
 ONBUILD RUN : and consider keeping these hints
 ONBUILD RUN : within ONBUILD RUN further
 
+# remove next line if package management is not required
+RUN apt update
+
 # further configuration
 
+# must be latest RUN statement
 RUN sh /.cleanup.sh
