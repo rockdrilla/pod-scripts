@@ -58,32 +58,51 @@ cat <<-'EOZ'
 	#!/bin/sh
 	set -e
 
-	## setup additional repositories
-	for i in stable testing unstable experimental ; do
-		echo "deb http://deb.debian.org/debian $i main contrib non-free"
-	done > "$1/etc/apt/sources.list"
-	chmod 0644 "$1/etc/apt/sources.list"
+EOZ
 
-	## setup repo priorities
-	cat >"$1/etc/apt/preferences.d/00-local" <<EOF
-		Package: *
-		Pin: release o=debian, a=unstable
-		Pin-Priority: 700
+## if not building stable:
+## setup additional repositories and their priorities
+prio=500 ; aux_repo=''
+case "$suite" in
+testing)      prio=550 ; aux_repo='stable unstable' ;;
+unstable)     prio=600 ; aux_repo='testing stable experimental' ;;
+experimental) prio=650 ; aux_repo='unstable testing stable' ;;
+esac
+if [ -n "$aux_repo" ] ; then
+	cat <<-'EOZ'
+		## setup repositories
+	EOZ
+	cat <<-EOZ
+		## setup repositories
+		for i in $suite $aux_repo ; do
+		    echo "deb http://deb.debian.org/debian \$i main contrib non-free"
+		done > "\$1/etc/apt/sources.list"
+		chmod 0644 "\$1/etc/apt/sources.list"
+	EOZ
+	cat <<-'EOZ'
+		## setup repo priorities
+		set +f
+		cat >"$1/etc/apt/preferences.d/00-local" <<EOF
+	EOZ
+	set +f
+	for i in $suite $aux_repo ; do
+		cat <<-EOZ
+			Package: *
+			Pin: release o=debian, a=$i
+			Pin-Priority: $prio
 
-		Package: *
-		Pin: release o=debian, a=testing
-		Pin-Priority: 650
+		EOZ
+		prio=$(( prio - 50 ))
+	done
+	set -f
+	cat <<-'EOZ'
+		EOF
+		set -f
+		chmod 0644 "$1/etc/apt/preferences.d/00-local"
 
-		Package: *
-		Pin: release o=debian, a=stable
-		Pin-Priority: 600
-
-		Package: *
-		Pin: release o=debian, a=experimental
-		Pin-Priority: 550
-	EOF
-	chmod 0644 "$1/etc/apt/preferences.d/00-local"
-
+	EOZ
+fi
+cat <<-'EOZ'
 	## prevent services from auto-starting
 	cat > "$1/usr/sbin/policy-rc.d" <<-'EOF'
 		#!/bin/sh
@@ -192,6 +211,7 @@ EOZ
 chmod 0755 "$chroot_postsetup_script"
 
 dpkg_opt_script=$(mktemp)
+set +f
 cat >"$dpkg_opt_script" <<-'EOZ'
 	force-unsafe-io
 
@@ -208,6 +228,7 @@ cat >"$dpkg_opt_script" <<-'EOZ'
 	path-exclude=/usr/share/aptitude/mine-help-*
 	path-exclude=/usr/share/aptitude/README.*
 EOZ
+set -f
 chmod 0644 "$dpkg_opt_script"
 
 apt_opt_script=$(mktemp)
