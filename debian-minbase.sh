@@ -53,13 +53,11 @@ orig_tmp=$TMPDIR ; TMPDIR=/tmp TEMPDIR=/tmp TMP=/tmp TEMP=/tmp
 
 chroot_postsetup_script=$(mktemp)
 {
-## generic setup
 cat <<-'EOZ'
 	#!/bin/sh
 	set -e
 
 EOZ
-
 ## if not building stable:
 ## setup additional repositories and their priorities
 prio=500 ; aux_repo=''
@@ -102,6 +100,7 @@ if [ -n "$aux_repo" ] ; then
 
 	EOZ
 fi
+## generic configuration
 cat <<-'EOZ'
 	## prevent services from auto-starting
 	cat > "$1/usr/sbin/policy-rc.d" <<-'EOF'
@@ -141,6 +140,12 @@ cat <<-'EOZ'
 	      -delete
 	fi ; unset i
 
+EOZ
+## image cleanup infrastructure
+set +f
+cat <<-'EOZ'
+	set +f
+
 	## setup image cleanup scripts
 	cat >"$1/.cleanup.sh" <<-'EOF'
 		#!/bin/sh
@@ -152,43 +157,129 @@ cat <<-'EOZ'
 	chmod 0755 "$1/.cleanup.sh"
 
 	mkdir -p "$1/.cleanup.d"
-	chmod 0755 "$1/.cleanup.d"
 
-	cat >"$1/.cleanup.d/$2" <<-'EOF'
+	cat >"$1/.cleanup.d/apt-dpkg-related" <<-'EOF'
 		#!/bin/sh
 		# SPDX-License-Identifier: BSD-3-Clause
 		# (c) 2021, Konstantin Demin
-		set -e
-		set -x -v
+		set -e -x -v
 
 		## remove apt cache and lists
 		for i in /var/lib/apt/lists /var/cache/apt/archives ; do
-		    find $i/ -xdev -mindepth 1 -type f -delete
-		    touch $i/lock
-		    chown 0:0 $i/lock
-		    chmod 0640 $i/lock
+		    find $i/ -mindepth 1 -type f -delete
+		    install -o 0 -g 0 -m 0640 /dev/null $i/lock
 		done
+		apt-get clean
 
-		## truncate log files
+		## remove directories
+		rm -rf \
+		  /var/lib/apt/lists/auxfiles
+
+		## remove files
+		rm -f \
+		  /var/cache/apt/pkgcache.bin \
+		  /var/cache/apt/srcpkgcache.bin \
+		  /var/lib/aptitude/pkgstates
+	EOF
+
+	cat >"$1/.cleanup.d/ldconfig-auxcache" <<-'EOF'
+		#!/bin/sh
+		# SPDX-License-Identifier: BSD-3-Clause
+		# (c) 2021, Konstantin Demin
+		set -e -x -v
+
+		## remove files
+		rm -f /var/cache/ldconfig/aux-cache
+	EOF
+
+	cat >"$1/.cleanup.d/logs" <<-'EOF'
+		#!/bin/sh
+		# SPDX-License-Identifier: BSD-3-Clause
+		# (c) 2021, Konstantin Demin
+		set -e -x -v
+
+		## remove apt logs
+		find /var/log/apt/ -mindepth 1 -delete
+
+		## remove stale logs
+		find /var/log/ -mindepth 1 -type f -print0 | \
+		grep -zE '\.([0-9]+|old|gz|bz2|xz|zst)$' | \
+		xargs -0 -r rm -rf
+
+		## remove files
+		rm -f \
+		  /var/log/alternatives.log \
+		  /var/log/aptitude \
+		  /var/log/dpkg.log
+
+		## truncate files
 		truncate -s 0 \
+		  /var/log/btmp \
 		  /var/log/faillog \
-		  /var/log/lastlog
+		  /var/log/lastlog \
+		  /var/log/wtmp
+	EOF
 
-		## remove python cache
-		find / -xdev -mindepth 1 -name '*.pyc' -type f -delete
+	cat >"$1/.cleanup.d/machine-id" <<-'EOF'
+		#!/bin/sh
+		# SPDX-License-Identifier: BSD-3-Clause
+		# (c) 2021, Konstantin Demin
+		set -e -x -v
 
-		## remove stale files
+		## remove files
+		rm -f \
+		  /etc/machine-id \
+		  /var/lib/dbus/machine-id
+
+		## install empty files
+		install -o 0 -g 0 -m 0444 /dev/null /etc/machine-id
+	EOF
+
+	cat >"$1/.cleanup.d/python-cache" <<-'EOF'
+		#!/bin/sh
+		# SPDX-License-Identifier: BSD-3-Clause
+		# (c) 2021, Konstantin Demin
+		set -e -x -v
+
+		## treewide remove python bytecode cache
+		find / -mindepth 1 -maxdepth 1 -type d -print0 | \
+		grep -zEv '^/(sys|proc|dev)$' | \
+		xargs -t -0 -r -I'{}' \
+		  find '{}' -mindepth 1 -name '*.pyc' -type f -delete
+	EOF
+
+	cat >"$1/.cleanup.d/stale" <<-'EOF'
+		#!/bin/sh
+		# SPDX-License-Identifier: BSD-3-Clause
+		# (c) 2021, Konstantin Demin
+		set -e -x -v
+
+		## remove files
 		rm -f \
 		  /var/cache/debconf/config.dat-old \
 		  /var/cache/debconf/templates.dat-old \
 		  /var/lib/aptitude/pkgstates.old \
 		  /var/lib/dpkg/diversions-old \
-		  /var/lib/dpkg/status-old \
-		  /var/log/aptitude
+		  /var/lib/dpkg/status-old
 	EOF
-	chmod 0755 "$1/.cleanup.d/$2"
+
+	cat >"$1/.cleanup.d/tmp" <<-'EOF'
+		#!/bin/sh
+		# SPDX-License-Identifier: BSD-3-Clause
+		# (c) 2021, Konstantin Demin
+		set -e -x -v
+
+		## list before unlinking
+		find /tmp -mindepth 1 -ls -delete
+	EOF
+
+	## mark directory and all scripts as executable
+	find "$1/.cleanup.d/" -exec chmod 0755 '{}' '+'
+
+	set -f
 
 EOZ
+set -f
 ## refresh aptitude/apt data
 { cat <<-EOF
 	update
@@ -250,7 +341,8 @@ mmdebstrap \
   --include="$pkg_aux $pkg_auto" \
   --aptopt="$apt_opt_script" \
   --dpkgopt="$dpkg_opt_script" \
-  --customize-hook="$chroot_postsetup_script \"\$1\" \"$image\"" \
+  --customize-hook="$chroot_postsetup_script" \
+  --skip=cleanup/apt \
   $suite "$tarball" || true
 
 rm -f "$dpkg_opt_script" "$apt_opt_script" "$chroot_postsetup_script"
