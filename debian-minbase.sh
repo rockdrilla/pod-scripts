@@ -67,9 +67,6 @@ unstable)     prio=600 ; aux_repo='testing stable experimental' ;;
 experimental) prio=650 ; aux_repo='unstable testing stable' ;;
 esac
 if [ -n "$aux_repo" ] ; then
-	cat <<-'EOZ'
-		## setup repositories
-	EOZ
 	cat <<-EOZ
 		## setup repositories
 		for i in $suite $aux_repo ; do
