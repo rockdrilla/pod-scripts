@@ -60,10 +60,25 @@ cat <<-'EOZ'
 	export DEBIAN_FRONTEND=noninteractive
 
 EOZ
-## if not building stable:
-## setup additional repositories and their priorities
+## setup repositories and their priorities
+comp='main contrib non-free'
 prio=500 ; aux_repo=''
 case "$suite" in
+stable)
+	aux_repo='stable-updates stable-proposed-updates stable-backports'
+	cat <<-EOZ
+		## setup repositories
+		{
+		for i in $suite $aux_repo ; do
+		    echo "deb http://deb.debian.org/debian \$i $comp"
+		done
+		echo "deb http://security.debian.org/debian-security stable/updates $comp"
+		} > "\$1/etc/apt/sources.list"
+		chmod 0644 "\$1/etc/apt/sources.list"
+
+	EOZ
+	aux_repo=''
+;;
 testing)      prio=550 ; aux_repo='stable unstable' ;;
 unstable)     prio=600 ; aux_repo='testing stable experimental' ;;
 experimental) prio=650 ; aux_repo='unstable testing stable' ;;
@@ -72,7 +87,7 @@ if [ -n "$aux_repo" ] ; then
 	cat <<-EOZ
 		## setup repositories
 		for i in $suite $aux_repo ; do
-		    echo "deb http://deb.debian.org/debian \$i main contrib non-free"
+		    echo "deb http://deb.debian.org/debian \$i $comp"
 		done > "\$1/etc/apt/sources.list"
 		chmod 0644 "\$1/etc/apt/sources.list"
 	EOZ
