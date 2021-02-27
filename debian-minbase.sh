@@ -57,6 +57,8 @@ cat <<-'EOZ'
 	#!/bin/sh
 	set -e
 
+	export DEBIAN_FRONTEND=noninteractive
+
 EOZ
 ## if not building stable:
 ## setup additional repositories and their priorities
@@ -127,6 +129,16 @@ cat <<-'EOZ'
 	rm -f "$1/var/lib/man-db/auto-update"
 
 EOZ
+## mark most non-essential packages as auto-installed
+{ cat <<-EOF
+	--schedule-only hold $pkg_aux
+	--schedule-only markauto '~i!~E!~M'
+	--schedule-only unmarkauto $pkg_aux
+	--schedule-only unhold $pkg_aux
+	--assume-yes install
+EOF
+} | sed -E 's/^/aptitude /' | paste -sd';' \
+  | sed -E 's/^(.*)$/chroot "$1" sh -e -c "\1"/'
 ## configure apt/dpkg
 set +f
 cat <<-'EOZ'
@@ -183,6 +195,12 @@ cat <<-'EOZ'
 	      '!' -iname locale.alias    \
 	      -delete
 	fi ; unset i
+	find "$1/usr/share/aptitude/" -mindepth 1 -print0 | \
+	grep -zE '/((aptitude-defaults|README)\.|(help|mine-help)-).*' | \
+	xargs -0 -r rm -rf
+
+	## force package reconfigure
+	chroot "$1" sh -c "aptitude --display-format '%p' search '~i' | xargs -r dpkg-reconfigure --force"
 
 EOZ
 ## image cleanup infrastructure
@@ -324,19 +342,6 @@ cat <<-'EOZ'
 
 EOZ
 set -f
-## refresh aptitude/apt data
-{ cat <<-EOF
-	update
-	forget-new
-	--schedule-only hold $pkg_aux
-	--schedule-only markauto '~i!~E!~M'
-	--schedule-only unmarkauto $pkg_aux
-	--schedule-only unhold $pkg_aux
-	--assume-yes install
-EOF
-} | sed -E 's/^/aptitude /' | paste -sd';' \
-  | sed -E 's/^(.*)$/\1;apt-cache gencaches/' \
-  | sed -E 's/^(.*)$/chroot "$1" sh -e -c "\1"/'
 ## cleanup
 cat <<-'EOZ'
 	## run cleanup
