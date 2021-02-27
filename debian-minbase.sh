@@ -122,11 +122,12 @@ cat <<-'EOZ'
 	## - set TZ to UTC
 	{
 	cat <<EOF
-		man-db  man-db/auto-update  false
+		man-db  man-db/auto-update  boolean false
 		tzdata  tzdata/Areas        select  Etc
 		tzdata  tzdata/Zones/Etc    select  UTC
 	EOF
 	} | chroot "$1" debconf-set-selections
+	rm -f "$1/var/lib/man-db/auto-update"
 
 	## ensure that there's no traces after dpkg's option "path-exclude"
 	for i in "$1/usr/share/doc" "$1/usr/share/info" "$1/usr/share/man" "$1/usr/share/help" ; do
