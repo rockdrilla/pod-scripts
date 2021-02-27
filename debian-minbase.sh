@@ -126,6 +126,52 @@ cat <<-'EOZ'
 	} | chroot "$1" debconf-set-selections
 	rm -f "$1/var/lib/man-db/auto-update"
 
+EOZ
+## configure apt/dpkg
+set +f
+cat <<-'EOZ'
+	set +f
+
+	## remove mmdebstrap artifacts
+	rm \
+	  "$1/etc/apt/apt.conf.d/99mmdebstrap" \
+	  "$1/etc/dpkg/dpkg.cfg.d/99mmdebstrap"
+
+	## setup dpkg configuration
+	cat > "$1/etc/dpkg/dpkg.cfg.d/00-base" <<-'EOF'
+		force-unsafe-io
+
+		path-exclude=/usr/share/doc/*
+		path-exclude=/usr/share/help/*
+		path-exclude=/usr/share/info/*
+		path-exclude=/usr/share/man/*
+
+		path-include=/usr/share/locale/locale.alias
+		path-exclude=/usr/share/locale/*
+
+		path-exclude=/usr/share/aptitude/aptitude-defaults.*
+		path-exclude=/usr/share/aptitude/help-*
+		path-exclude=/usr/share/aptitude/mine-help-*
+		path-exclude=/usr/share/aptitude/README.*
+	EOF
+
+	## setup apt configuration
+	cat > "$1/etc/apt/apt.conf.d/00-base" <<-'EOF'
+		APT::Sandbox::User "root";
+
+		APT::Install-Recommends "false";
+
+		Acquire::Languages "none";
+
+		aptitude::UI::InfoAreaTabs "true";
+	EOF
+
+	set -f
+
+EOZ
+set -f
+## base image cleanup
+cat <<-'EOZ'
 	## ensure that there's no traces after dpkg's option "path-exclude"
 	for i in "$1/usr/share/doc" "$1/usr/share/info" "$1/usr/share/man" "$1/usr/share/help" ; do
 	    [ -d "$i" ] || continue
@@ -300,24 +346,9 @@ EOZ
 chmod 0755 "$chroot_postsetup_script"
 
 dpkg_opt_script=$(mktemp)
-set +f
 cat >"$dpkg_opt_script" <<-'EOZ'
 	force-unsafe-io
-
-	path-exclude=/usr/share/doc/*
-	path-exclude=/usr/share/help/*
-	path-exclude=/usr/share/info/*
-	path-exclude=/usr/share/man/*
-
-	path-include=/usr/share/locale/locale.alias
-	path-exclude=/usr/share/locale/*
-
-	path-exclude=/usr/share/aptitude/aptitude-defaults.*
-	path-exclude=/usr/share/aptitude/help-*
-	path-exclude=/usr/share/aptitude/mine-help-*
-	path-exclude=/usr/share/aptitude/README.*
 EOZ
-set -f
 chmod 0644 "$dpkg_opt_script"
 
 apt_opt_script=$(mktemp)
@@ -327,8 +358,6 @@ cat >"$apt_opt_script" <<-'EOZ'
 	APT::Install-Recommends "false";
 
 	Acquire::Languages "none";
-
-	aptitude::UI::InfoAreaTabs "true";
 EOZ
 chmod 0644 "$apt_opt_script"
 
