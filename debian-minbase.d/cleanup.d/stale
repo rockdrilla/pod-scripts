@@ -1,0 +1,12 @@
+#!/bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+# (c) 2021, Konstantin Demin
+set -e -x -v
+
+## remove files
+rm -f \
+  /var/cache/debconf/config.dat-old \
+  /var/cache/debconf/templates.dat-old \
+  /var/lib/aptitude/pkgstates.old \
+  /var/lib/dpkg/diversions-old \
+  /var/lib/dpkg/status-old

@@ -1,0 +1,21 @@
+#!/bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+# (c) 2021, Konstantin Demin
+set -e -x -v
+
+## remove apt cache and lists
+for i in /var/lib/apt/lists /var/cache/apt/archives ; do
+	find $i/ -mindepth 1 -type f -delete
+	install -o 0 -g 0 -m 0640 /dev/null $i/lock
+done
+apt-get clean
+
+## remove directories
+rm -rf \
+  /var/lib/apt/lists/auxfiles
+
+## remove files
+rm -f \
+  /var/cache/apt/pkgcache.bin \
+  /var/cache/apt/srcpkgcache.bin \
+  /var/lib/aptitude/pkgstates

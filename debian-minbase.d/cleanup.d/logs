@@ -1,0 +1,25 @@
+#!/bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+# (c) 2021, Konstantin Demin
+set -e -x -v
+
+## remove apt logs
+find /var/log/apt/ -mindepth 1 -delete
+
+## remove stale logs
+find /var/log/ -mindepth 1 -type f -print0 | \
+grep -zE '\.([0-9]+|old|gz|bz2|xz|zst)$' | \
+xargs -0 -r rm -rf
+
+## remove files
+rm -f \
+  /var/log/alternatives.log \
+  /var/log/aptitude \
+  /var/log/dpkg.log
+
+## truncate files
+truncate -s 0 \
+  /var/log/btmp \
+  /var/log/faillog \
+  /var/log/lastlog \
+  /var/log/wtmp

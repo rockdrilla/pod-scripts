@@ -1,0 +1,10 @@
+#!/bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+# (c) 2021, Konstantin Demin
+set -e -x -v
+
+## treewide remove python bytecode cache
+find / -mindepth 1 -maxdepth 1 -type d -print0 | \
+grep -zEv '^/(sys|proc|dev)$' | \
+xargs -t -0 -r -I'{}' \
+  find '{}' -mindepth 1 -name '*.pyc' -type f -delete

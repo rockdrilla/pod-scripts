@@ -1,0 +1,12 @@
+#!/bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+# (c) 2021, Konstantin Demin
+set -e -x -v
+
+## remove files
+rm -f \
+  /etc/machine-id \
+  /var/lib/dbus/machine-id
+
+## install empty files
+install -o 0 -g 0 -m 0444 /dev/null /etc/machine-id
