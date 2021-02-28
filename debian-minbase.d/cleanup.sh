@@ -1,7 +1,6 @@
 #!/bin/sh
 # SPDX-License-Identifier: BSD-3-Clause
 # (c) 2021, Konstantin Demin
-set -e
 
 ## reset locale to default one
 unset LANGUAGE LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
@@ -16,3 +15,8 @@ export TEMPDIR=/tmp
 export TEMP=/tmp
 
 run-parts --verbose --exit-on-error /.cleanup.d
+r=$?
+
+find /tmp -mindepth 1 -ls -delete
+
+exit $r
