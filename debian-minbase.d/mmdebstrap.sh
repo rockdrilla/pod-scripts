@@ -104,25 +104,5 @@ rm \
   "$1/etc/apt/apt.conf.d/99mmdebstrap" \
   "$1/etc/dpkg/dpkg.cfg.d/99mmdebstrap"
 
-## base image cleanup
-
-## ensure that there's no traces after dpkg's option "path-exclude"
-for i in "$1/usr/share/doc" "$1/usr/share/info" "$1/usr/share/man" "$1/usr/share/help" ; do
-	[ -d "$i" ] || continue
-	find "$i/" -xdev -mindepth 1 \
-	  -delete
-done ; unset i
-i="$1/usr/share/locale" ; if [ -d "$i" ] ; then
-	find "$i/" -xdev -mindepth 1 \
-	  '!' -iname locale.alias    \
-	  -delete
-fi ; unset i
-find "$1/usr/share/aptitude/" -mindepth 1 -print0 | \
-grep -zE '/((aptitude-defaults|README)\.|(help|mine-help)-).*' | \
-xargs -0 -r rm -rf
-
-## force package reconfigure
-chroot "$1" sh -c "aptitude --display-format '%p' search '~i' | xargs -r dpkg-reconfigure --force"
-
 ## run cleanup
 chroot "$1" sh /.cleanup.sh

@@ -1,0 +1,154 @@
+#!/bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+# (c) 2021, Konstantin Demin
+
+case "$1" in
+## recursion: turn path filters into file list (symlinks are listed too)
+ex|in)
+	set +f
+
+	## $1  - action (ex[clude] / in[clude])
+	## $2+ - path glob (one argument!)
+
+	action="$1"
+	shift
+	path_glob="$*"
+
+	result=$(mktemp -p "$RESULT_DIR" "$action.XXXXXXXX")
+
+	find / -mindepth 1 -maxdepth 1 -type d -print0 | \
+	grep -zEv '^/(sys|proc|dev)$' | \
+	sort -zV | \
+	xargs -0 -r -I'{}' \
+		find '{}' -mindepth 1 -path "$path_glob" '!' -type d | \
+	sort -V > "$result"
+
+	exit 0
+;;
+esac
+
+set -x -v
+
+if [ -z "$NPROC" ] ; then
+	NPROC=$(grep -Ece '^processor' /proc/cpuinfo || echo 1)
+	NPROC=$(( NPROC + (NPROC+1)/2 ))
+fi
+
+dpkg_cfg='/etc/dpkg/dpkg.cfg.d'
+dpkg_info='/var/lib/dpkg/info'
+shallow_cfg='/.cleanup.d/dpkg.cfg.d'
+re_path='^path-(ex|in)clude=(.+)$'
+
+t=$(mktemp)
+
+## first: cut away interesting rules from dpkg configuration
+## to separate ("shallow") directory
+tfiles=$(mktemp)
+find "$dpkg_cfg/" -maxdepth 1 -type f -exec grep -El "$re_path" '{}' '+' > "$tfiles"
+
+if [ -s "$tfiles" ] ; then
+	mkdir -p "$shallow_cfg"
+
+	while read conf ; do
+		name=$(basename "$conf")
+
+		## save rules in separate file
+		grep -E "$re_path" < "$conf" > "$t"
+
+		## cut rules from original file
+		## if it became empty - delete it
+		sed -i -E "/($re_path|^\\s*\$)/d" "$conf"
+		grep -lqE '\S' "$conf" || rm -f "$conf"
+
+		## reuse existing file if any
+		[ -s "$shallow_cfg/$name" ] && cat "$shallow_cfg/$name" >> "$t"
+
+		## remove trailing spaces, sort and remove duplicates
+		sed -E 's/ +$//;' < "$t" | \
+		sort -uV > "$shallow_cfg/$name"
+	done < "$tfiles"
+fi
+rm -f "$tfiles" ; unset tfiles
+
+## nothing to filter at all
+[ -d "$shallow_cfg" ] || exit 0
+
+## merge all rules, reformat them like "(ex|in) /path/selector"
+## and remove trailing spaces (again)
+tpath=$(mktemp)
+find "$shallow_cfg/" -maxdepth 1 -type f -exec cat '{}' '+' | \
+sed -En "/$re_path/{s//\\1 \\2/;s/ +\$//;p;}" | \
+sort -uV > "$tpath"
+
+## nothing to filter at all (again)
+if ! [ -s "$tpath" ] ; then
+	rm -f "$tpath"
+	exit 0
+fi
+
+## run ourself recursively and store results in directory
+tparts=$(mktemp -d)
+xargs -L 1 -P "$NPROC" env RESULT_DIR="$tparts" "$0" < "$tpath"
+
+rm -f "$tpath" ; unset tpath
+
+## merge results to "save list"
+tINclude=$(mktemp)
+find "$tparts/" -mindepth 1 -name 'in.*' -exec cat '{}' '+' | \
+sort -uV > "$tINclude"
+
+## merge results to "remove list"
+tEXclude=$(mktemp)
+find "$tparts/" -mindepth 1 -name 'ex.*' -exec cat '{}' '+' | \
+sort -uV > "$tEXclude"
+
+rm -rf "$tparts" ; unset tparts
+
+## nothing to filter at all (again?)
+if ! [ -s "$tEXclude" ] ; then
+	rm -f "$tINclude" "$tEXclude"
+	exit 0
+fi
+
+## filter out files in "save list"
+tremove=$(mktemp)
+if [ -s "$tINclude" ] ; then
+	grep -Fxv -f "$tINclude" < "$tEXclude" > "$tremove"
+else
+	cat < "$tEXclude" > "$tremove"
+fi
+
+rm -f "$tINclude" "$tEXclude" ; unset tINclude tEXclude
+
+## nothing to filter at all (again?!)
+if ! [ -s "$tremove" ] ; then
+	rm -f "$tremove"
+	exit 0
+fi
+
+## list affected packages except dpkg: it's affected almost all time
+## so we reconfigure it separately
+taffected=$(mktemp)
+find "$dpkg_info/" -name '*.list' \
+  -exec grep -Fxl -f "$tremove" '{}' '+' | \
+sed -E 's/^.*\/([^/]+)\.list$/\1/' | \
+grep -Ev '^dpkg(:?|$)' | \
+sort -uV > "$taffected"
+
+## remove files already!
+xargs -r rm -f < "$tremove"
+
+rm -f "$tremove" ; unset tremove
+
+## affected almost all time >:)
+dpkg-reconfigure --force dpkg
+
+## reconfigure affected packages
+xargs -r dpkg-reconfigure --force < "$taffected"
+r=$?
+
+rm -f "$taffected" ; unset taffected
+
+## TODO: remove empty directories maybe?
+
+exit $r
