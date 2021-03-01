@@ -14,7 +14,7 @@ export TMP=/tmp
 export TEMPDIR=/tmp
 export TEMP=/tmp
 
-run-parts --verbose --exit-on-error /.cleanup.d
+run-parts ${VERBOSE:+--verbose} --exit-on-error /.cleanup.d
 r=$?
 
 find /tmp -mindepth 1 -ls -delete

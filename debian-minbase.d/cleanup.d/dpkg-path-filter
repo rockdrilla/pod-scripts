@@ -27,7 +27,7 @@ ex|in)
 ;;
 esac
 
-set -x -v
+if [ -n "$VERBOSE" ] ; then set -x -v ; fi
 
 if [ -z "$NPROC" ] ; then
 	NPROC=$(grep -Ece '^processor' /proc/cpuinfo || echo 1)
