@@ -142,9 +142,6 @@ xargs -r rm -f < "$tremove"
 
 rm -f "$tremove" ; unset tremove
 
-## affected almost all time >:)
-dpkg-reconfigure --force dpkg
-
 ## reconfigure affected packages
 xargs -r dpkg-reconfigure --force < "$taffected"
 r=$?
