@@ -39,14 +39,14 @@ dpkg_info='/var/lib/dpkg/info'
 shallow_cfg='/.cleanup.d/dpkg.cfg.d'
 re_path='^path-(ex|in)clude=(.+)$'
 
-t=$(mktemp)
-
 ## first: cut away interesting rules from dpkg configuration
 ## to separate ("shallow") directory
 tfiles=$(mktemp)
 find "$dpkg_cfg/" -maxdepth 1 -type f -exec grep -El "$re_path" '{}' '+' > "$tfiles"
 
 if [ -s "$tfiles" ] ; then
+	t=$(mktemp)
+
 	mkdir -p "$shallow_cfg"
 
 	while read conf ; do
@@ -67,6 +67,8 @@ if [ -s "$tfiles" ] ; then
 		sed -E 's/ +$//;' < "$t" | \
 		sort -uV > "$shallow_cfg/$name"
 	done < "$tfiles"
+
+	rm "$t" ; unset t
 fi
 rm -f "$tfiles" ; unset tfiles
 
