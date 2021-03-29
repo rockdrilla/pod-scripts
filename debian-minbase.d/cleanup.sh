@@ -16,6 +16,7 @@ export TEMP=/tmp
 
 ## setup debconf frontend via environment
 export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
 ## setup debconf priority via environment
 export DEBIAN_PRIORITY=critical
 

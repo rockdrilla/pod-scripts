@@ -14,6 +14,7 @@ chroot "$1" find / -xdev -gid $5 -exec chown 0:0 {} +
 
 ## setup debconf frontend via environment
 export DEBIAN_FRONTEND=noninteractive
+export DEBCONF_NONINTERACTIVE_SEEN=true
 
 ## setup repositories and their priorities
 comp='main contrib non-free'
