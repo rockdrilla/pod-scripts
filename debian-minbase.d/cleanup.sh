@@ -23,6 +23,7 @@ export DEBIAN_PRIORITY=critical
 run-parts ${VERBOSE:+--verbose} --exit-on-error /.cleanup.d
 r=$?
 
-find /tmp -mindepth 1 -ls -delete
+## cleanup /tmp
+find /tmp -mindepth 1 ${VERBOSE:+-ls} -delete
 
 exit $r
