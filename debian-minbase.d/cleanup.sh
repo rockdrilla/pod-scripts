@@ -14,6 +14,11 @@ export TMP=/tmp
 export TEMPDIR=/tmp
 export TEMP=/tmp
 
+## setup debconf frontend via environment
+export DEBIAN_FRONTEND=noninteractive
+## setup debconf priority via environment
+export DEBIAN_PRIORITY=critical
+
 run-parts ${VERBOSE:+--verbose} --exit-on-error /.cleanup.d
 r=$?
 
