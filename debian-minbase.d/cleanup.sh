@@ -20,10 +20,14 @@ export DEBCONF_NONINTERACTIVE_SEEN=true
 ## setup debconf priority via environment
 export DEBIAN_PRIORITY=critical
 
+du -xsh /
+
 run-parts ${VERBOSE:+--verbose} --exit-on-error /.cleanup.d
 r=$?
 
 ## cleanup /tmp
 find /tmp -mindepth 1 ${VERBOSE:+-ls} -delete
+
+du -xsh /
 
 exit $r
