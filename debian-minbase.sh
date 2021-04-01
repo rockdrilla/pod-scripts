@@ -126,4 +126,4 @@ buildah commit --squash --timestamp $ts "$c" "$image:$tag" || true
 buildah rm "$c"
 podman image rm "$k"
 
-echo "$image has been built successfully"
+echo "$image:$tag has been built successfully"
