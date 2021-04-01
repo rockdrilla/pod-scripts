@@ -21,7 +21,7 @@ comp='main contrib non-free'
 prio=500 ; aux_repo=''
 case "$2" in
 stable)
-	aux_repo='$2-updates $2-proposed-updates $2-backports'
+	aux_repo="$2-updates $2-proposed-updates $2-backports"
 	## setup repositories
 	{
 	for i in $2 $aux_repo ; do
