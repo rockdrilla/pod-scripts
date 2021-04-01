@@ -7,7 +7,8 @@ FROM docker.io/rockdrilla/debian-minbase-$FLAVOUR
 RUN aptitude update ; aptitude -y install build-essential bzr curl dwarves \
     dwz gfortran git gnupg mercurial pkg-config procps subversion unzip wget \
     autoconf-archive+M automake+M bison+M ca-certificates+M fakeroot+M \
-    flex+M libc-devtools+M libfl-dev+M libltdl-dev+M libtool+M netbase+M \
+    flex+M libfl-dev+M libltdl-dev+M libtool+M netbase+M \
     openssh-client+M psmisc+M zip+M
+RUN aptitude -y install libc-devtools+M || true
 
 RUN sh /.cleanup.sh
