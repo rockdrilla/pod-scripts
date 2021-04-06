@@ -101,6 +101,10 @@ ln -s /bin/true "$1/usr/bin/ischroot"
 vim=/usr/bin/vim
 chroot "$1" update-alternatives --install $vim vim $vim.tiny 1
 
+## install e-wrapper directly from GitHub
+curl -sSL https://raw.githubusercontent.com/kilobyte/e/master/e > "$1/usr/local/bin/e"
+chroot "$1" chmod 0755 /usr/local/bin/e
+
 ## configure debconf:
 ## - never update man-db
 ## - set TZ to UTC
