@@ -13,16 +13,6 @@ fi
 dir0=$(dirname "$0")
 name0=$(basename "$0")
 
-suite=unstable
-if [ -n "$1" ] ; then
-	x=$(printf '%s' "$1"  | tr -d '[a-z]' | wc -c)
-	if [ "$x" = "0" ] ; then
-		suite=$1
-	else
-		echo "parameter '$1' looks spoiled, defaulting to '$suite'" 1>&2
-	fi
-fi
-
 pkg_aux='apt-utils aptitude e-wrapper less lsof vim-tiny'
 pkg_auto='dialog whiptail'
 image=$(echo "$name0" | sed -E 's/\.[^.]+$//')
@@ -48,6 +38,22 @@ buildah_version=$(pkg_ver buildah)
 podman_version=$(pkg_ver podman)
 
 
+suite=
+case "$image" in
+debian*) suite=unstable ;;
+ubuntu*) suite=groovy ;;
+esac
+[ -n "$suite" ]
+
+if [ -n "$1" ] ; then
+	x=$(printf '%s' "$1"  | tr -d '[a-z]' | wc -c)
+	if [ "$x" = "0" ] ; then
+		suite=$1
+	else
+		echo "parameter '$1' looks spoiled, defaulting to '$suite'" 1>&2
+	fi
+fi
+
 tag="$suite-"$(date '+%Y%m%d%H%M%S' -d @$ts)
 
 tarball=$(mktemp -u)'.tar'
@@ -55,16 +61,29 @@ tarball=$(mktemp -u)'.tar'
 ## hack for libpam-tmpdir : we need 'shared' /tmp not per-user one :)
 orig_tmp=$TMPDIR ; TMPDIR=/tmp TEMPDIR=/tmp TMP=/tmp TEMP=/tmp
 
-name0=$(echo "$name0" | sed -E 's/\.[^.]+$//')
-dir0="$dir0/$name0.d"
+if [ -d "$dir0/$image.d" ] ; then
+	dir0="$dir0/$image.d"
+else
+	## current script is symlinked thus directory does not exist
+	name0=$(readlink -e "$0")
+	name0=$(basename "$name0" | sed -E 's/\.[^.]+$//')
+	dir0="$dir0/$name0.d"
+fi
 
 uid=$(ps -n -o euid= -p $$)
 gid=$(ps -n -o egid= -p $$)
+
+comps=''
+case "$image" in
+debian*) comps='main,contrib,non-free' ;;
+ubuntu*) comps='main,restricted,universe,multiverse' ;;
+esac
 
 mmdebstrap \
   --verbose \
   --format=tar \
   --variant=minbase \
+  ${comps:+"--components=$comps"} \
   --include="$pkg_aux $pkg_auto" \
   --aptopt="$dir0/apt.conf" \
   --dpkgopt="$dir0/dpkg.cfg" \
@@ -74,7 +93,7 @@ mmdebstrap \
   --customize-hook="sync-in '$dir0/cleanup.d' /.cleanup.d" \
   --customize-hook="copy-in '$dir0/cleanup.sh' /" \
   --customize-hook='mv "$1/cleanup.sh" "$1/.cleanup.sh"' \
-  --customize-hook="'$dir0/mmdebstrap.sh' \"\$1\" $suite '$pkg_aux' $uid $gid" \
+  --customize-hook="'$dir0/mmdebstrap.sh' \"\$1\" $image $suite '$pkg_aux' $uid $gid" \
   --skip=cleanup/apt \
   $suite "$tarball" || true
 
