@@ -25,7 +25,7 @@ fi
 
 pkg_aux='apt-utils aptitude e-wrapper less lsof vim-tiny'
 pkg_auto='dialog whiptail'
-image="debian-minbase-$suite"
+image=$(echo "$name0" | sed -E 's/\.[^.]+$//')
 
 arch=$(dpkg --print-architecture)
 
@@ -48,7 +48,7 @@ buildah_version=$(pkg_ver buildah)
 podman_version=$(pkg_ver podman)
 
 
-tag=$(date '+%Y%m%d%H%M%S' -d @$ts)
+tag="$suite-"$(date '+%Y%m%d%H%M%S' -d @$ts)
 
 tarball=$(mktemp -u)'.tar'
 
