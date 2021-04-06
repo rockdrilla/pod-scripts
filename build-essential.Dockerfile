@@ -1,8 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # (c) 2021, Konstantin Demin
 
-ARG FLAVOUR=unstable:latest
-FROM docker.io/rockdrilla/debian-minbase-$FLAVOUR
+ARG DISTRO=debian
+ARG SUITE=unstable
+FROM docker.io/rockdrilla/$DISTRO-minbase:$SUITE
 
 RUN aptitude update ; aptitude -y install build-essential bzr curl dwarves \
     dwz gfortran git gnupg mercurial pkg-config procps subversion unzip wget \
