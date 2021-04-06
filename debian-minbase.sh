@@ -6,7 +6,7 @@ set -e
 if [ -n "$SOURCE_DATE_EPOCH" ] ; then
 	ts="$SOURCE_DATE_EPOCH"
 else
-	ts=$(date '+%s')
+	ts=$(date -u '+%s')
 	export SOURCE_DATE_EPOCH=$ts
 fi
 
