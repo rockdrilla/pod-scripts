@@ -3,6 +3,13 @@
 # (c) 2021, Konstantin Demin
 set -e
 
+if [ -n "$SOURCE_DATE_EPOCH" ] ; then
+	ts="$SOURCE_DATE_EPOCH"
+else
+	ts=$(date '+%s')
+	export SOURCE_DATE_EPOCH=$ts
+fi
+
 dir0=$(dirname "$0")
 name0=$(basename "$0")
 
@@ -40,9 +47,6 @@ mmdebstrap_version=$(pkg_ver mmdebstrap)
 buildah_version=$(pkg_ver buildah)
 podman_version=$(pkg_ver podman)
 
-
-ts=$(date '+%s')
-export SOURCE_DATE_EPOCH=$ts
 
 tag=$(date '+%Y%m%d%H%M%S' -d @$ts)
 
