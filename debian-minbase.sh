@@ -78,7 +78,7 @@ mmdebstrap \
   --skip=cleanup/apt \
   $suite "$tarball" || true
 
-if ! tar -tf "$tarball" >/dev/null ; then
+if ! tar -tf "$tarball" >/dev/null 2>/dev/null ; then
 	rm "$tarball"
 	exit 1
 fi
