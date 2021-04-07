@@ -71,11 +71,11 @@ RUN export GOROOT_BOOTSTRAP="$(go env GOROOT)" ; \
     p="/tmp" ; \
     tar -C "$p" -xf /tmp/go.tar.gz ; \
     cd "$p/go/src/" ; ./make.bash ; \
-    [ -x "$p/go/bin/go" ]
-RUN p="/tmp" ; \
+    [ -x "$p/go/bin/go" ] \
+&& p="/tmp" ; \
     export PATH="$p/go/bin:${PATH}" ; \
-    go install std
-RUN cd /tmp/go/ ; \
+    go install std \
+&& cd /tmp/go/ ; \
     rm -rf pkg/*/cmd pkg/bootstrap pkg/obj pkg/tool/*/api \
     pkg/tool/*/go_bootstrap src/cmd/dist/dist
 
@@ -92,17 +92,17 @@ RUN export GOROOT_BOOTSTRAP="/tmp/go" ; \
     p="/usr/local" ; \
     tar -C "$p" -xf /tmp/go.tar.gz ; \
     cd "$p/go/src/" ; ./make.bash ; \
-    [ -x "$p/go/bin/go" ]
-RUN p="/usr/local" ; \
+    [ -x "$p/go/bin/go" ] \
+&& p="/usr/local" ; \
     export PATH="$p/go/bin:${PATH}" ; \
     go install std
-RUN cd /usr/local/go/ ; \
+&& cd /usr/local/go/ ; \
     rm -vrf pkg/*/cmd pkg/bootstrap pkg/obj pkg/tool/*/api \
-    pkg/tool/*/go_bootstrap src/cmd/dist/dist
+    pkg/tool/*/go_bootstrap src/cmd/dist/dist \
 
-RUN sh /.cleanup.sh
+&& sh /.cleanup.sh \
 
-RUN tar -C / -cf - /go /usr/local/go | tar -C /mnt -xf -
+&& tar -C / -cf - /go /usr/local/go | tar -C /mnt -xf -
 
 #################################################
 
