@@ -11,7 +11,7 @@ find /var/log/apt/ -mindepth 1 -delete
 ## remove stale logs
 find /var/log/ -mindepth 1 -type f -print0 | \
 grep -zE '\.([0-9]+|old|gz|bz2|xz|zst)$' | \
-xargs -0 -r rm -rf
+xargs -0 -r rm -f
 
 ## remove files
 rm -f \
@@ -20,8 +20,8 @@ rm -f \
   /var/log/dpkg.log
 
 ## truncate files
-truncate -s 0 \
-  /var/log/btmp \
-  /var/log/faillog \
-  /var/log/lastlog \
-  /var/log/wtmp
+for i in btmp wtmp faillog lastlog tallylog ; do
+	i="/var/log/$i"
+	[ -s "$i" ] || continue
+	truncate -s 0 "$i"
+done
