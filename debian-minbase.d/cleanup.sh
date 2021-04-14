@@ -25,6 +25,10 @@ du -xsh /
 run-parts ${VERBOSE:+--verbose} --exit-on-error /.cleanup.d
 r=$?
 
+## cleanup /run
+find /run -mindepth 1 ${VERBOSE:+-ls} -delete
+install -d -m 01777 /run/lock
+
 ## cleanup /tmp
 find /tmp -mindepth 1 ${VERBOSE:+-ls} -delete
 
