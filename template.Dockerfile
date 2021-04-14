@@ -1,7 +1,9 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # (c) 2021, Konstantin Demin
 
-FROM docker.io/rockdrilla/debian-minbase-unstable
+ARG DISTRO=debian
+ARG SUITE=unstable
+FROM docker.io/rockdrilla/$DISTRO-minbase:$SUITE
 
 # please issue 'sh /.cleanup.sh' as last RUN command in your images
 
