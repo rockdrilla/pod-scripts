@@ -17,6 +17,10 @@ pkg_aux='apt-utils aptitude less lsof nano ncurses-term vim-tiny'
 pkg_auto='dialog whiptail'
 image=$(echo "$name0" | sed -E 's/\.[^.]+$//')
 
+## resolve real file
+name0=$(readlink -e "$0")
+name0=$(basename "$name0")
+
 arch=$(dpkg --print-architecture)
 
 repo_base='https://github.com/rockdrilla/pod-scripts'
@@ -65,8 +69,7 @@ if [ -d "$dir0/$image.d" ] ; then
 	dir0="$dir0/$image.d"
 else
 	## current script is symlinked thus directory does not exist
-	name0=$(readlink -e "$0")
-	name0=$(basename "$name0" | sed -E 's/\.[^.]+$//')
+	name0=$(echo "$name0" | sed -E 's/\.[^.]+$//')
 	dir0="$dir0/$name0.d"
 fi
 
