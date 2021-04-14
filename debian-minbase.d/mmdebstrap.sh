@@ -132,6 +132,9 @@ c="$c ; aptitude --schedule-only unhold $4"
 c="$c ; aptitude --assume-yes install"
 chroot "$1" sh -e -c "$c"
 
+## remove (unnecessary) e2fs packages
+chroot "$1" dpkg --force-all --purge e2fsprogs libext2fs2 libss2 logsave || :
+
 ## remove mmdebstrap artifacts
 rm \
   "$1/etc/apt/apt.conf.d/99mmdebstrap" \
