@@ -8,6 +8,15 @@ set -e
 ## $5 - uid
 ## $6 - gid
 
+## read environment from file (except PATH)
+f_env=$(dirname "$0")'/env.sh'
+while read L ; do
+	case "$L" in
+	PATH=*) ;;
+	*) export "$L" ;;
+	esac
+done < "$f_env" ; unset f_env L
+
 ## fix ownership:
 ## mmdebstrap's actions 'sync-in' and 'copy-in' preserves source user/group
 chroot "$1" find / -xdev -uid $5 -exec chown 0:0 {} +

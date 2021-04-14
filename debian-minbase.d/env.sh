@@ -1,0 +1,13 @@
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+LANG=C.UTF-8
+LC_ALL=C.UTF-8
+VISUAL=/usr/bin/sensible-editor
+EDITOR=/usr/bin/sensible-editor
+TERM=xterm
+TMPDIR=/tmp
+TMP=/tmp
+TEMPDIR=/tmp
+TEMP=/tmp
+PAGER=less
+LESS=FRS
+TZ=Etc/UTC

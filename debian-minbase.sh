@@ -134,19 +134,8 @@ bc --label "debian.buildah=$buildah_version"
 bc --label "debian.mmdebstrap=$mmdebstrap_version"
 bc --label "debian.podman=$podman_version"
 bc --label "tarball.hash=$tar_sha256"
-bc --env PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-bc --env LANG=C.UTF-8
-bc --env LC_ALL=C.UTF-8
-bc --env VISUAL=/usr/bin/sensible-editor
-bc --env EDITOR=/usr/bin/sensible-editor
-bc --env TERM=xterm
-bc --env TMPDIR=/tmp
-bc --env TMP=/tmp
-bc --env TEMPDIR=/tmp
-bc --env TEMP=/tmp
-bc --env PAGER=less
-bc --env LESS=FRS
-bc --env TZ=Etc/UTC
+
+while read L ; do bc --env "$L" ; done < "$dir0/env.sh"
 
 buildah commit --squash --timestamp $ts "$c" "$image:$tag" || true
 
