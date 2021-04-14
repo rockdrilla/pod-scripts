@@ -117,6 +117,9 @@ EOF
 } | chroot "$1" debconf-set-selections
 rm -f "$1/var/lib/man-db/auto-update"
 
+## remove (unnecessary) e2fs packages
+chroot "$1" sh -c 'for i in e2fsprogs libext2fs2 libss2 logsave ; do dpkg --force-all --purge $i || : ; done'
+
 ## perform full upgrade
 c=':'
 c="$c ; aptitude update"
@@ -131,9 +134,6 @@ c="$c ; aptitude --schedule-only unmarkauto $4"
 c="$c ; aptitude --schedule-only unhold $4"
 c="$c ; aptitude --assume-yes install"
 chroot "$1" sh -e -c "$c"
-
-## remove (unnecessary) e2fs packages
-chroot "$1" dpkg --force-all --purge e2fsprogs libext2fs2 libss2 logsave || :
 
 ## remove mmdebstrap artifacts
 rm \
