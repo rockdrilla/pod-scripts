@@ -107,7 +107,7 @@ chroot "$1" chmod 0755 /usr/local/bin/e
 
 ## configure debconf:
 ## - never update man-db
-## - set TZ to UTC
+## - set TZ to Etc/UTC
 {
 cat <<EOF
 	man-db  man-db/auto-update  boolean false
@@ -116,6 +116,10 @@ cat <<EOF
 EOF
 } | chroot "$1" debconf-set-selections
 rm -f "$1/var/lib/man-db/auto-update"
+
+## configure timezone
+echo Etc/UTC > "$1/etc/timezone"
+ln -fs /usr/share/zoneinfo/Etc/UTC "$1/etc/localtime"
 
 ## remove (unnecessary) e2fs packages
 chroot "$1" sh -c 'for i in e2fsprogs libext2fs2 libss2 logsave ; do dpkg --force-all --purge $i || : ; done'
