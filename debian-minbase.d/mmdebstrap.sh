@@ -117,13 +117,19 @@ EOF
 } | chroot "$1" debconf-set-selections
 rm -f "$1/var/lib/man-db/auto-update"
 
+## perform full upgrade
+c=':'
+c="$c ; aptitude update"
+c="$c ; aptitude -y full-upgrade"
+chroot "$1" sh -e -c "$c"
+
 ## mark most non-essential packages as auto-installed
-apti_cmd() { echo "aptitude $@ ;" ; }
-c="$c "$(apti_cmd --schedule-only hold $4)
-c="$c "$(apti_cmd --schedule-only markauto '~i!~E!~M')
-c="$c "$(apti_cmd --schedule-only unmarkauto $4)
-c="$c "$(apti_cmd --schedule-only unhold $4)
-c="$c "$(apti_cmd --assume-yes install)
+c=':'
+c="$c ; aptitude --schedule-only hold $4"
+c="$c ; aptitude --schedule-only markauto '~i!~E!~M'"
+c="$c ; aptitude --schedule-only unmarkauto $4"
+c="$c ; aptitude --schedule-only unhold $4"
+c="$c ; aptitude --assume-yes install"
 chroot "$1" sh -e -c "$c"
 
 ## remove mmdebstrap artifacts
