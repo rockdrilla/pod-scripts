@@ -22,10 +22,6 @@ done < "$f_env" ; unset f_env L
 chroot "$1" find / -xdev -uid $5 -exec chown 0:0 {} +
 chroot "$1" find / -xdev -gid $6 -exec chown 0:0 {} +
 
-## setup debconf frontend via environment
-export DEBIAN_FRONTEND=noninteractive
-export DEBCONF_NONINTERACTIVE_SEEN=true
-
 ## strip apt keyrings from sources.list:
 sed -E -i 's/ \[[^]]+]//' "$1/etc/apt/sources.list"
 
