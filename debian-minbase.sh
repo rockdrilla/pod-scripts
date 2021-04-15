@@ -135,7 +135,10 @@ bc --label "debian.mmdebstrap=$mmdebstrap_version"
 bc --label "debian.podman=$podman_version"
 bc --label "tarball.hash=$tar_sha256"
 
-while read L ; do bc --env "$L" ; done < "$dir0/env.sh"
+t_env=$(mktemp)
+grep -Ev '^(#|$)' < "$dir0/env.sh" > "$t_env"
+while read L ; do bc --env "$L" ; done < "$t_env"
+rm -f "$t_env"
 
 buildah commit --squash --timestamp $ts "$c" "$image:$tag" || true
 

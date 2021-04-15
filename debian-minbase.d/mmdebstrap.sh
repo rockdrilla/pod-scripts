@@ -10,12 +10,15 @@ set -e
 
 ## read environment from file (except PATH)
 f_env=$(dirname "$0")'/env.sh'
+t_env=$(mktemp)
+grep -Ev '^(#|$)' < "$f_env" > "$t_env"
 while read L ; do
 	case "$L" in
 	PATH=*) ;;
 	*) export "$L" ;;
 	esac
-done < "$f_env" ; unset f_env L
+done < "$t_env"
+rm -f "$t_env"
 
 ## fix ownership:
 ## mmdebstrap's actions 'sync-in' and 'copy-in' preserves source user/group
