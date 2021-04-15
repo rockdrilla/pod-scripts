@@ -114,21 +114,28 @@ chroot "$1" update-alternatives --install $vim vim $vim.tiny 1
 curl -sSL https://raw.githubusercontent.com/kilobyte/e/master/e > "$1/usr/local/bin/e"
 chroot "$1" chmod 0755 /usr/local/bin/e
 
-## configure debconf:
-## - never update man-db
-## - set TZ to Etc/UTC
-{
-cat <<EOF
-	man-db  man-db/auto-update  boolean false
-	tzdata  tzdata/Areas        select  Etc
-	tzdata  tzdata/Zones/Etc    select  UTC
+## man-db:
+## - disable auto-update
+## - disable install setuid
+{ cat <<-EOF
+	man-db  man-db/auto-update     boolean  false
+	man-db  man-db/install-setuid  boolean  false
 EOF
 } | chroot "$1" debconf-set-selections
 rm -f "$1/var/lib/man-db/auto-update"
 
-## configure timezone
-echo Etc/UTC > "$1/etc/timezone"
-ln -fs /usr/share/zoneinfo/Etc/UTC "$1/etc/localtime"
+## timezone
+echo "$TZ" > "$1/etc/timezone"
+ln -fs "/usr/share/zoneinfo/$TZ" "$1/etc/localtime"
+IFS=/ read area zone <<EOF
+$TZ
+EOF
+{ cat <<-EOF
+	tzdata  tzdata/Areas      select  $area
+	tzdata  tzdata/Zones/Etc  select  $zone
+EOF
+} | chroot "$1" debconf-set-selections
+unset area zone
 
 ## remove (unnecessary) e2fs packages
 chroot "$1" sh -c 'for i in e2fsprogs libext2fs2 libss2 logsave ; do dpkg --force-all --purge $i || : ; done'
