@@ -156,3 +156,13 @@ rm \
 
 ## run cleanup
 chroot "$1" /opt/cleanup.sh
+
+## eliminate empty directories under certain paths
+for i in \
+/usr/share/doc/ \
+/usr/share/help/ \
+/usr/share/info/ \
+/usr/share/man/ \
+/usr/share/locale/ \
+; do [ -d "$1/$i" ] || continue ; \
+chroot "$1" find "$i" -xdev -mindepth 1 -maxdepth 1 -type d -exec /opt/tree-opt.sh '{}' ';' ; done

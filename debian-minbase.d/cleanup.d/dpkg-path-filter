@@ -148,6 +148,4 @@ r=$?
 
 rm -f "${taffected}" ; unset taffected
 
-## TODO: remove empty directories maybe?
-
 exit $r
