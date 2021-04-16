@@ -126,17 +126,7 @@ EOF
 rm -f "$1/var/lib/man-db/auto-update"
 
 ## timezone
-echo "$TZ" > "$1/etc/timezone"
-ln -fs "/usr/share/zoneinfo/$TZ" "$1/etc/localtime"
-IFS=/ read area zone <<EOF
-$TZ
-EOF
-{ cat <<-EOF
-	tzdata  tzdata/Areas      select  $area
-	tzdata  tzdata/Zones/Etc  select  $zone
-EOF
-} | chroot "$1" debconf-set-selections
-unset area zone
+chroot "$1" /tz.sh "$TZ"
 
 ## remove (unnecessary) e2fs packages
 chroot "$1" sh -c 'for i in e2fsprogs libext2fs2 libss2 logsave ; do dpkg --force-all --purge $i || : ; done'

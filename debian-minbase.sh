@@ -95,6 +95,7 @@ mmdebstrap \
   --customize-hook="sync-in '$dir0/dpkg.cfg.d' /etc/dpkg/dpkg.cfg.d" \
   --customize-hook="sync-in '$dir0/cleanup.d' /.cleanup.d" \
   --customize-hook="copy-in '$dir0/cleanup.sh' /" \
+  --customize-hook="copy-in '$dir0/tz.sh' /" \
   --customize-hook='mv "$1/cleanup.sh" "$1/.cleanup.sh"' \
   --customize-hook="'$dir0/mmdebstrap.sh' \"\$1\" $image $suite '$pkg_aux' $uid $gid" \
   --skip=cleanup/apt \
