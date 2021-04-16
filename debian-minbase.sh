@@ -13,7 +13,7 @@ fi
 dir0=$(dirname "$0")
 name0=$(basename "$0")
 
-pkg_aux='apt-utils aptitude less lsof nano ncurses-term tzdata vim-tiny'
+pkg_aux='apt-utils aptitude less lsof nano ncurses-term sensible-utils tzdata vim-tiny'
 pkg_auto='dialog whiptail'
 image=$(echo "$name0" | sed -E 's/\.[^.]+$//')
 
