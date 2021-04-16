@@ -146,7 +146,7 @@ c="$c ; aptitude --schedule-only hold $4"
 c="$c ; aptitude --schedule-only markauto '~i!~E!~M'"
 c="$c ; aptitude --schedule-only unmarkauto $4"
 c="$c ; aptitude --schedule-only unhold $4"
-c="$c ; aptitude --assume-yes install"
+c="$c ; aptitude -y install"
 chroot "$1" sh -e -c "$c"
 
 ## remove mmdebstrap artifacts
