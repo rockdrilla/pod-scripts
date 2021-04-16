@@ -3,7 +3,7 @@
 # (c) 2021, Konstantin Demin
 set -e
 
-if [ -n "$VERBOSE" ] ; then set -x -v ; fi
+[ -z "${VERBOSE}" ] || set -x -v
 
 ## remove apt logs
 find /var/log/apt/ -mindepth 1 -delete

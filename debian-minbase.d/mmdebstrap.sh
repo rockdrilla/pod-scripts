@@ -13,14 +13,14 @@ set -e
 ## read environment from file (except PATH)
 f_env=$(dirname "$0")'/env.sh'
 t_env=$(mktemp)
-grep -Ev '^(#|$)' < "$f_env" > "$t_env"
+grep -Ev '^(#|$)' < "${f_env}" > "${t_env}"
 while read L ; do
 	case "$L" in
 	PATH=*) ;;
 	*) export "$L" ;;
 	esac
-done < "$t_env"
-rm -f "$t_env"
+done < "${t_env}"
+rm -f "${t_env}"
 
 ## fix ownership:
 ## mmdebstrap's actions 'sync-in' and 'copy-in' preserves source user/group
@@ -37,10 +37,10 @@ ubuntu*)
 	aux_repo="$3-updates $3-proposed"
 	## setup repositories
 	{
-	for i in $3 $aux_repo ; do
-		echo "deb http://archive.ubuntu.com/ubuntu $i $comp"
+	for i in $3 ${aux_repo} ; do
+		echo "deb http://archive.ubuntu.com/ubuntu $i ${comp}"
 	done
-	echo "deb http://security.ubuntu.com/ubuntu $3-security $comp"
+	echo "deb http://security.ubuntu.com/ubuntu $3-security ${comp}"
 	} > "$1/etc/apt/sources.list"
 	chmod 0644 "$1/etc/apt/sources.list"
 
@@ -57,10 +57,10 @@ debian*)
 		aux_repo="$3-updates $3-proposed-updates"
 		## setup repositories
 		{
-		for i in $3 $aux_repo ; do
-			echo "deb http://deb.debian.org/debian $i $comp"
+		for i in $3 ${aux_repo} ; do
+			echo "deb http://deb.debian.org/debian $i ${comp}"
 		done
-		echo "deb http://security.debian.org/debian-security $3/updates $comp"
+		echo "deb http://security.debian.org/debian-security $3/updates ${comp}"
 		} > "$1/etc/apt/sources.list"
 		chmod 0644 "$1/etc/apt/sources.list"
 
@@ -68,21 +68,21 @@ debian*)
 	;;
 	esac
 
-	if [ -n "$aux_repo" ] ; then
+	if [ -n "${aux_repo}" ] ; then
 		## setup repositories
-		for i in $3 $aux_repo ; do
-			echo "deb http://deb.debian.org/debian $i $comp"
+		for i in $3 ${aux_repo} ; do
+			echo "deb http://deb.debian.org/debian $i ${comp}"
 		done > "$1/etc/apt/sources.list"
 		chmod 0644 "$1/etc/apt/sources.list"
 
 		set +f
 
 		## setup repo priorities
-		for i in $3 $aux_repo ; do
+		for i in $3 ${aux_repo} ; do
 			cat <<-EOF
 				Package: *
 				Pin: release o=debian, a=$i
-				Pin-Priority: $prio
+				Pin-Priority: ${prio}
 
 			EOF
 			prio=$(( prio - 50 ))
@@ -109,7 +109,7 @@ ln -s /bin/true "$1/usr/bin/ischroot"
 
 ## install vim-tiny as variant for vim
 vim=/usr/bin/vim
-chroot "$1" update-alternatives --install $vim vim $vim.tiny 1
+chroot "$1" update-alternatives --install ${vim} vim ${vim}.tiny 1
 
 ## install e-wrapper directly from GitHub
 curl -sSL https://raw.githubusercontent.com/kilobyte/e/master/e > "$1/usr/local/bin/e"
@@ -126,7 +126,7 @@ EOF
 rm -f "$1/var/lib/man-db/auto-update"
 
 ## timezone
-chroot "$1" /opt/tz.sh "$TZ"
+chroot "$1" /opt/tz.sh "${TZ}"
 
 ## remove (unnecessary) e2fs packages
 chroot "$1" dpkg --force-all --purge e2fsprogs libext2fs2 libss2 logsave || :
