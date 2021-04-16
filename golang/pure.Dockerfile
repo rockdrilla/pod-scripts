@@ -112,7 +112,7 @@ ENV GOROOT="/usr/local/go"
 ENV GOPATH="/go"
 
 ENV PATH="/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-ENV LANG="C.UTF8"
+ENV LANG="C.UTF-8"
 ENV LC_ALL="C.UTF-8"
 ENV TERM="xterm"
 ENV TMPDIR="/go/tmp"
