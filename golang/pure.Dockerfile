@@ -124,4 +124,6 @@ WORKDIR /go
 
 COPY --from=stage2  /mnt  /
 
+ENTRYPOINT [ "/usr/local/go/bin/go" ]
+
 RUN [ "/usr/local/go/bin/go", "version" ]
