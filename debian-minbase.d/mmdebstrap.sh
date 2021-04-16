@@ -128,17 +128,17 @@ rm -f "$1/var/lib/man-db/auto-update"
 ## timezone
 chroot "$1" /opt/tz.sh "${TZ}"
 
-## remove (unnecessary) e2fs packages
-chroot "$1" dpkg --force-all --purge e2fsprogs libext2fs2 libss2 logsave || :
-
-## remove (unnecessary) fdisk packages
-chroot "$1" dpkg --force-all --purge fdisk libfdisk1 || :
-
 ## perform full upgrade
 c=':'
 c="$c ; aptitude update || :"
 c="$c ; aptitude -y full-upgrade"
 chroot "$1" sh -e -c "$c"
+
+## remove (unnecessary) e2fs packages
+chroot "$1" dpkg --force-all --purge e2fsprogs libext2fs2 libss2 logsave || :
+
+## remove (unnecessary) fdisk packages
+chroot "$1" dpkg --force-all --purge fdisk libfdisk1 || :
 
 ## mark most non-essential packages as auto-installed
 c=':'
