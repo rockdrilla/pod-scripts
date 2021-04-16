@@ -136,7 +136,7 @@ chroot "$1" dpkg --force-all --purge fdisk libfdisk1 || :
 
 ## perform full upgrade
 c=':'
-c="$c ; aptitude update"
+c="$c ; aptitude update || :"
 c="$c ; aptitude -y full-upgrade"
 chroot "$1" sh -e -c "$c"
 
