@@ -12,4 +12,4 @@ RUN aptitude update ; aptitude -y install build-essential bzr curl dwarves \
     openssh-client+M psmisc+M zip+M
 RUN aptitude -y install libc-devtools+M || true
 
-RUN sh /.cleanup.sh
+RUN /opt/cleanup.sh

@@ -5,7 +5,7 @@ ARG DISTRO=debian
 ARG SUITE=unstable
 FROM docker.io/rockdrilla/$DISTRO-minbase:$SUITE
 
-# please issue 'sh /.cleanup.sh' as last RUN command in your images
+# please issue '/opt/cleanup.sh' as last RUN command in your images
 
 # remove next line if package management is not required
 RUN aptitude update
@@ -13,4 +13,4 @@ RUN aptitude update
 # further configuration
 
 # must be latest RUN statement
-RUN sh /.cleanup.sh
+RUN /opt/cleanup.sh

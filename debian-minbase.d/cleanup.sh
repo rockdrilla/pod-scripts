@@ -22,7 +22,7 @@ export DEBIAN_PRIORITY=critical
 
 du -xsh /
 
-run-parts ${VERBOSE:+--verbose} --exit-on-error /.cleanup.d
+run-parts ${VERBOSE:+--verbose} --exit-on-error /opt/cleanup.d
 r=$?
 
 ## cleanup /run

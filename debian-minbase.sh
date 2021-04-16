@@ -90,13 +90,12 @@ mmdebstrap \
   --include="$pkg_aux $pkg_auto" \
   --aptopt="$dir0/apt.conf" \
   --dpkgopt="$dir0/dpkg.cfg" \
-  --customize-hook='mkdir -p "$1/.cleanup.d"' \
+  --customize-hook='mkdir -p "$1/opt/cleanup.d"' \
   --customize-hook="sync-in '$dir0/apt.conf.d' /etc/apt/apt.conf.d" \
   --customize-hook="sync-in '$dir0/dpkg.cfg.d' /etc/dpkg/dpkg.cfg.d" \
-  --customize-hook="sync-in '$dir0/cleanup.d' /.cleanup.d" \
-  --customize-hook="copy-in '$dir0/cleanup.sh' /" \
-  --customize-hook="copy-in '$dir0/tz.sh' /" \
-  --customize-hook='mv "$1/cleanup.sh" "$1/.cleanup.sh"' \
+  --customize-hook="sync-in '$dir0/cleanup.d' /opt/cleanup.d" \
+  --customize-hook="copy-in '$dir0/cleanup.sh' /opt/" \
+  --customize-hook="copy-in '$dir0/tz.sh' /opt/" \
   --customize-hook="'$dir0/mmdebstrap.sh' \"\$1\" $image $suite '$pkg_aux' $uid $gid" \
   --skip=cleanup/apt \
   $suite "$tarball" || true

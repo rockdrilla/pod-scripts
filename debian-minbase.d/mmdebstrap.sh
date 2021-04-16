@@ -126,7 +126,7 @@ EOF
 rm -f "$1/var/lib/man-db/auto-update"
 
 ## timezone
-chroot "$1" /tz.sh "$TZ"
+chroot "$1" /opt/tz.sh "$TZ"
 
 ## remove (unnecessary) e2fs packages
 chroot "$1" sh -c 'for i in e2fsprogs libext2fs2 libss2 logsave ; do dpkg --force-all --purge $i || : ; done'
@@ -155,4 +155,4 @@ rm \
   "$1/etc/dpkg/dpkg.cfg.d/99mmdebstrap"
 
 ## run cleanup
-chroot "$1" sh /.cleanup.sh
+chroot "$1" /opt/cleanup.sh

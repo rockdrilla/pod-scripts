@@ -100,7 +100,7 @@ RUN cd /usr/local/go/ ; \
     rm -vrf pkg/*/cmd pkg/bootstrap pkg/obj pkg/tool/*/api \
     pkg/tool/*/go_bootstrap src/cmd/dist/dist
 
-RUN sh /.cleanup.sh
+RUN /opt/cleanup.sh
 
 RUN tar -C / -cf - /go /usr/local/go | tar -C /mnt -xf -
 

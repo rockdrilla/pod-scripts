@@ -36,7 +36,7 @@ fi
 
 dpkg_cfg='/etc/dpkg/dpkg.cfg.d'
 dpkg_info='/var/lib/dpkg/info'
-shallow_cfg='/.cleanup.d/dpkg.cfg.d'
+shallow_cfg='/opt/cleanup.d/dpkg.cfg.d'
 re_path='^path-(ex|in)clude=(.+)$'
 
 ## first: cut away interesting rules from dpkg configuration
