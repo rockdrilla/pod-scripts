@@ -44,7 +44,7 @@ podman_version=$(pkg_ver podman)
 suite=
 case "${image}" in
 debian*) suite=unstable ;;
-ubuntu*) suite=groovy ;;
+ubuntu*) suite=hirsute ;;
 esac
 [ -n "${suite}" ]
 
