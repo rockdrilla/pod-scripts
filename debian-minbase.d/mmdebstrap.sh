@@ -4,12 +4,19 @@
 
 set -e
 
+## auxiliary packages to be installed
+pkg_manual='less lsof nano ncurses-term procps psmisc sensible-utils tzdata vim-tiny'
+pkg_auto='dialog whiptail'
+
+## default packages to be removed
+pkg_purge='e2fsprogs fdisk libext2fs2 libfdisk1 libss2 logsave'
+
+## script parameters:
 ## $1 - chroot path
 ## $2 - image name
 ## $3 - suite name
 ## $4 - uid
 ## $5 - gid
-## $6 - packages
 
 ## read environment from file (except PATH)
 f_env=$(dirname "$0")'/env.sh'
@@ -22,11 +29,6 @@ while read L ; do
 	esac
 done < "${t_env}"
 rm -f "${t_env}"
-
-## fix ownership:
-## mmdebstrap's actions 'sync-in' and 'copy-in' preserves source user/group
-chroot "$1" find / -xdev -uid $4 -exec chown 0:0 {} +
-chroot "$1" find / -xdev -gid $5 -exec chown 0:0 {} +
 
 ## strip apt keyrings from sources.list:
 sed -E -i 's/ \[[^]]+]//' "$1/etc/apt/sources.list"
@@ -108,14 +110,6 @@ chmod 0755 "$1/usr/sbin/policy-rc.d"
 chroot "$1" dpkg-divert --divert /usr/bin/ischroot.debianutils --rename /usr/bin/ischroot
 ln -s /bin/true "$1/usr/bin/ischroot"
 
-## install vim-tiny as variant for vim
-vim=/usr/bin/vim
-chroot "$1" update-alternatives --install ${vim} vim ${vim}.tiny 1
-
-## install e-wrapper directly from GitHub
-curl -sSL https://raw.githubusercontent.com/kilobyte/e/master/e > "$1/usr/local/bin/e"
-chroot "$1" chmod 0755 /usr/local/bin/e
-
 ## man-db:
 ## - disable auto-update
 ## - disable install setuid
@@ -126,37 +120,59 @@ EOF
 } | chroot "$1" debconf-set-selections
 rm -f "$1/var/lib/man-db/auto-update"
 
-## timezone
-chroot "$1" /opt/tz.sh "${TZ}"
+
+
+## update package lists; may fail sometimes,
+## e.g. soon-to-release channels like Debian "bullseye" @ 22.04.2021
+chroot "$1" apt update || :
+
+## install apt-utils first, then aptitude
+chroot "$1" apt -y install apt-utils
+chroot "$1" apt -y install aptitude
 
 ## perform full upgrade
-c=':'
-c="$c ; aptitude update || :"
-c="$c ; aptitude -y full-upgrade"
-chroot "$1" sh -e -c "$c"
+chroot "$1" aptitude -y full-upgrade
 
-## remove (unnecessary) e2fs packages
-chroot "$1" dpkg --force-all --purge e2fsprogs libext2fs2 libss2 logsave || :
+## install auxiliary packages
+chroot "$1" aptitude -y install ${pkg_manual} ${pkg_auto}
 
-## remove (unnecessary) fdisk packages
-chroot "$1" dpkg --force-all --purge fdisk libfdisk1 || :
+## remove unnecessary packages
+chroot "$1" dpkg --force-all --purge ${pkg_purge} || :
 
 ## mark most non-essential packages as auto-installed
 c=':'
-c="$c ; aptitude --schedule-only hold $6"
+c="$c ; aptitude --schedule-only hold ${pkg_manual}"
 c="$c ; aptitude --schedule-only markauto '~i!~E!~M'"
-c="$c ; aptitude --schedule-only unmarkauto $6"
-c="$c ; aptitude --schedule-only unhold $6"
+c="$c ; aptitude --schedule-only unmarkauto ${pkg_manual}"
+c="$c ; aptitude --schedule-only unhold ${pkg_manual}"
 c="$c ; aptitude -y install"
 chroot "$1" sh -e -c "$c"
 
-## remove mmdebstrap artifacts
-rm \
-  "$1/etc/apt/apt.conf.d/99mmdebstrap" \
-  "$1/etc/dpkg/dpkg.cfg.d/99mmdebstrap"
+## remove unnecessary packages (again - to ensure they're gone)
+chroot "$1" dpkg --force-all --purge ${pkg_purge} || :
+
+
+
+## timezone
+chroot "$1" /opt/tz.sh "${TZ}"
+
+## install vim-tiny as variant for vim
+vim=/usr/bin/vim
+chroot "$1" update-alternatives --install ${vim} vim ${vim}.tiny 1
+
+## install e-wrapper directly from GitHub
+curl -sSL -o "$1/usr/local/bin/e" https://raw.githubusercontent.com/kilobyte/e/master/e
+chroot "$1" chmod 0755 /usr/local/bin/e
+
+
 
 ## run cleanup
 chroot "$1" /opt/cleanup.sh
+
+## remove mmdebstrap artifacts
+rm -f \
+  "$1/etc/apt/apt.conf.d/99mmdebstrap" \
+  "$1/etc/dpkg/dpkg.cfg.d/99mmdebstrap"
 
 ## eliminate empty directories under certain paths
 for i in \
@@ -165,5 +181,12 @@ for i in \
 /usr/share/info/ \
 /usr/share/man/ \
 /usr/share/locale/ \
-; do [ -d "$1/$i" ] || continue ; \
-chroot "$1" find "$i" -xdev -mindepth 1 -maxdepth 1 -type d -exec /opt/tree-opt.sh '{}' ';' ; done
+; do
+	[ -d "$1/$i" ] || continue
+	chroot "$1" find "$i" -xdev -mindepth 1 -maxdepth 1 -type d -exec /opt/tree-opt.sh '{}' ';'
+done
+
+## fix ownership:
+## mmdebstrap's actions 'sync-in' and 'copy-in' preserves source user/group
+chroot "$1" find / -xdev -uid $4 -exec chown 0:0 {} +
+chroot "$1" find / -xdev -gid $5 -exec chown 0:0 {} +

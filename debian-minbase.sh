@@ -14,8 +14,6 @@ fi
 dir0=$(dirname "$0")
 name0=$(basename "$0")
 
-pkg_aux='apt-utils aptitude less lsof nano ncurses-term procps psmisc sensible-utils tzdata vim-tiny'
-pkg_auto='dialog whiptail'
 image=$(echo "${name0}" | sed -E 's/\.[^.]+$//')
 
 ## resolve real file
@@ -88,7 +86,6 @@ mmdebstrap \
   --format=tar \
   --variant=minbase \
   ${comps:+"--components=${comps}"} \
-  --include="${pkg_aux} ${pkg_auto}" \
   --aptopt="${dir0}/apt.conf" \
   --dpkgopt="${dir0}/dpkg.cfg" \
   --customize-hook='mkdir -p "$1/opt/cleanup.d"' \
@@ -99,7 +96,7 @@ mmdebstrap \
   --customize-hook="copy-in '${dir0}/interactive.sh' /opt/" \
   --customize-hook="copy-in '${dir0}/tree-opt.sh' /opt/" \
   --customize-hook="copy-in '${dir0}/tz.sh' /opt/" \
-  --customize-hook="'${dir0}/mmdebstrap.sh' \"\$1\" ${image} ${suite} ${uid} ${gid} '${pkg_aux}'" \
+  --customize-hook="'${dir0}/mmdebstrap.sh' \"\$1\" ${image} ${suite} ${uid} ${gid}" \
   --skip=cleanup/apt \
   ${suite} "${tarball}" || true
 
