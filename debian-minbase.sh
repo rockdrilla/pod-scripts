@@ -96,6 +96,7 @@ mmdebstrap \
   --customize-hook="sync-in '${dir0}/dpkg.cfg.d' /etc/dpkg/dpkg.cfg.d" \
   --customize-hook="sync-in '${dir0}/cleanup.d' /opt/cleanup.d" \
   --customize-hook="copy-in '${dir0}/cleanup.sh' /opt/" \
+  --customize-hook="copy-in '${dir0}/interactive.sh' /opt/" \
   --customize-hook="copy-in '${dir0}/tree-opt.sh' /opt/" \
   --customize-hook="copy-in '${dir0}/tz.sh' /opt/" \
   --customize-hook="'${dir0}/mmdebstrap.sh' \"\$1\" ${image} ${suite} '${pkg_aux}' ${uid} ${gid}" \
