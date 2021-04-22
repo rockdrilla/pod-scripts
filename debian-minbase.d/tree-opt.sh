@@ -5,7 +5,8 @@
 [ -d "$1" ] || exit 0
 
 find "$1" -mindepth 1 -maxdepth 1 -type d -print0 \
-| xargs -0 -r -P 2 -n 1 "$0"
+| sort -zV \
+| xargs -0 -r -n 1 "$0"
 
 t=$(mktemp)
 
