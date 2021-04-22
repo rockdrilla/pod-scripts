@@ -7,9 +7,9 @@ set -e
 ## $1 - chroot path
 ## $2 - image name
 ## $3 - suite name
-## $4 - packages
-## $5 - uid
-## $6 - gid
+## $4 - uid
+## $5 - gid
+## $6 - packages
 
 ## read environment from file (except PATH)
 f_env=$(dirname "$0")'/env.sh'
@@ -25,8 +25,8 @@ rm -f "${t_env}"
 
 ## fix ownership:
 ## mmdebstrap's actions 'sync-in' and 'copy-in' preserves source user/group
-chroot "$1" find / -xdev -uid $5 -exec chown 0:0 {} +
-chroot "$1" find / -xdev -gid $6 -exec chown 0:0 {} +
+chroot "$1" find / -xdev -uid $4 -exec chown 0:0 {} +
+chroot "$1" find / -xdev -gid $5 -exec chown 0:0 {} +
 
 ## strip apt keyrings from sources.list:
 sed -E -i 's/ \[[^]]+]//' "$1/etc/apt/sources.list"
@@ -143,10 +143,10 @@ chroot "$1" dpkg --force-all --purge fdisk libfdisk1 || :
 
 ## mark most non-essential packages as auto-installed
 c=':'
-c="$c ; aptitude --schedule-only hold $4"
+c="$c ; aptitude --schedule-only hold $6"
 c="$c ; aptitude --schedule-only markauto '~i!~E!~M'"
-c="$c ; aptitude --schedule-only unmarkauto $4"
-c="$c ; aptitude --schedule-only unhold $4"
+c="$c ; aptitude --schedule-only unmarkauto $6"
+c="$c ; aptitude --schedule-only unhold $6"
 c="$c ; aptitude -y install"
 chroot "$1" sh -e -c "$c"
 

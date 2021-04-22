@@ -99,7 +99,7 @@ mmdebstrap \
   --customize-hook="copy-in '${dir0}/interactive.sh' /opt/" \
   --customize-hook="copy-in '${dir0}/tree-opt.sh' /opt/" \
   --customize-hook="copy-in '${dir0}/tz.sh' /opt/" \
-  --customize-hook="'${dir0}/mmdebstrap.sh' \"\$1\" ${image} ${suite} '${pkg_aux}' ${uid} ${gid}" \
+  --customize-hook="'${dir0}/mmdebstrap.sh' \"\$1\" ${image} ${suite} ${uid} ${gid} '${pkg_aux}'" \
   --skip=cleanup/apt \
   ${suite} "${tarball}" || true
 
