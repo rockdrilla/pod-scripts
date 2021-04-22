@@ -1,4 +1,7 @@
 #!/bin/sh
+# SPDX-License-Identifier: BSD-3-Clause
+# (c) 2021, Konstantin Demin
+
 [ -d "$1" ] || exit 0
 
 find "$1" -mindepth 1 -maxdepth 1 -type d -print0 \
