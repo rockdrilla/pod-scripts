@@ -4,6 +4,11 @@
 
 set -e
 
+if [ -n "${TARBALL_ONLY}" ] ; then
+	[ -n "$2" ]
+	[ -w "$2" ] || touch "$2"
+fi
+
 if [ -n "${SOURCE_DATE_EPOCH}" ] ; then
 	ts="${SOURCE_DATE_EPOCH}"
 else
@@ -90,6 +95,12 @@ mmdebstrap \
 if ! tar -tf "${tarball}" >/dev/null 2>/dev/null ; then
 	rm "${tarball}"
 	exit 1
+fi
+
+if [ -n "${TARBALL_ONLY}" ] ; then
+	cat < "${tarball}" > "$2"
+	rm -f "${tarball}"
+	exit
 fi
 
 tar_sha256=$(sha256 "${tarball}")
