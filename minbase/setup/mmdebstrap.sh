@@ -19,7 +19,7 @@ pkg_purge='e2fsprogs fdisk libext2fs2 libfdisk1 libss2 logsave'
 ## $5 - gid
 
 ## read environment from file (except PATH)
-f_env=$(dirname "$0")'/env.sh'
+f_env=$(dirname "$0")'/../env.sh'
 t_env=$(mktemp)
 grep -Ev '^(#|$)' < "${f_env}" > "${t_env}"
 while read L ; do

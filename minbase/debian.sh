@@ -14,7 +14,7 @@ fi
 dir0=$(dirname "$0")
 name0=$(basename "$0")
 
-image=$(echo "${name0}" | sed -E 's/\.[^.]+$//')
+image=$(echo "${name0}" | sed -E 's/\.[^.]+$//')'-minbase'
 
 ## resolve real file
 name0=$(readlink -e "$0")
@@ -64,14 +64,6 @@ tarball=$(mktemp -u)'.tar'
 ## hack for libpam-tmpdir : we need 'shared' /tmp not per-user one :)
 orig_tmp="${TMPDIR}" ; TMPDIR=/tmp TEMPDIR=/tmp TMP=/tmp TEMP=/tmp
 
-if [ -d "${dir0}/${image}.d" ] ; then
-	dir0="${dir0}/${image}.d"
-else
-	## current script is symlinked thus directory does not exist
-	name0=$(echo "${name0}" | sed -E 's/\.[^.]+$//')
-	dir0="${dir0}/${name0}.d"
-fi
-
 uid=$(ps -n -o euid= -p $$)
 gid=$(ps -n -o egid= -p $$)
 
@@ -86,17 +78,12 @@ mmdebstrap \
   --format=tar \
   --variant=minbase \
   ${comps:+"--components=${comps}"} \
-  --aptopt="${dir0}/apt.conf" \
-  --dpkgopt="${dir0}/dpkg.cfg" \
-  --customize-hook='mkdir -p "$1/opt/cleanup.d"' \
-  --customize-hook="sync-in '${dir0}/apt.conf.d' /etc/apt/apt.conf.d" \
-  --customize-hook="sync-in '${dir0}/dpkg.cfg.d' /etc/dpkg/dpkg.cfg.d" \
-  --customize-hook="sync-in '${dir0}/cleanup.d' /opt/cleanup.d" \
-  --customize-hook="copy-in '${dir0}/cleanup.sh' /opt/" \
-  --customize-hook="copy-in '${dir0}/interactive.sh' /opt/" \
-  --customize-hook="copy-in '${dir0}/tree-opt.sh' /opt/" \
-  --customize-hook="copy-in '${dir0}/tz.sh' /opt/" \
-  --customize-hook="'${dir0}/mmdebstrap.sh' \"\$1\" ${image} ${suite} ${uid} ${gid}" \
+  --aptopt="${dir0}/setup/apt.conf" \
+  --dpkgopt="${dir0}/setup/dpkg.cfg" \
+  --customize-hook="sync-in '${dir0}/opt' /opt" \
+  --customize-hook="sync-in '${dir0}/setup/apt.conf.d' /etc/apt/apt.conf.d" \
+  --customize-hook="sync-in '${dir0}/setup/dpkg.cfg.d' /etc/dpkg/dpkg.cfg.d" \
+  --customize-hook="'${dir0}/setup/mmdebstrap.sh' \"\$1\" ${image} ${suite} ${uid} ${gid}" \
   --skip=cleanup/apt \
   ${suite} "${tarball}" || true
 
