@@ -5,11 +5,10 @@ ARG DISTRO=debian
 ARG SUITE=unstable
 FROM docker.io/rockdrilla/$DISTRO-minbase:$SUITE
 
-RUN aptitude update ; aptitude -y install build-essential bzr curl dwarves \
-    dwz gfortran git gnupg mercurial pkg-config procps subversion unzip wget \
-    autoconf-archive+M automake+M bison+M ca-certificates+M fakeroot+M \
-    flex+M libfl-dev+M libltdl-dev+M libtool+M netbase+M \
-    openssh-client+M psmisc+M zip+M
-RUN aptitude -y install libc-devtools+M || true
+RUN aptitude update ; \
+    aptitude -y --with-recommends install \
+        autoconf autoconf-archive automake bison build-essential bzr curl \
+        debhelper dwarves dwz flex gettext gfortran git gnulib gnupg libtool \
+        mercurial pkg-config psmisc subversion unzip wget zip
 
 RUN /opt/cleanup.sh
