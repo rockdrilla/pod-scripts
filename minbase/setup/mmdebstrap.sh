@@ -5,7 +5,7 @@
 set -e
 
 ## auxiliary packages to be installed
-pkg_manual='less lsof nano ncurses-term procps psmisc sensible-utils tzdata vim-tiny'
+pkg_manual='lsof ncurses-base procps tzdata'
 pkg_auto='dialog whiptail'
 
 ## default packages to be removed
@@ -155,14 +155,6 @@ chroot "$1" dpkg --force-all --purge ${pkg_purge} || :
 
 ## timezone
 chroot "$1" /opt/tz.sh "${TZ}"
-
-## install vim-tiny as variant for vim
-vim=/usr/bin/vim
-chroot "$1" update-alternatives --install ${vim} vim ${vim}.tiny 1
-
-## install e-wrapper directly from GitHub
-curl -sSL -o "$1/usr/local/bin/e" https://raw.githubusercontent.com/kilobyte/e/master/e
-chroot "$1" chmod 0755 /usr/local/bin/e
 
 
 
