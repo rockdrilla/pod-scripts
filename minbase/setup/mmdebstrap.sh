@@ -4,6 +4,8 @@
 
 set -e
 
+chroot "$1" /opt/cleanup.d/dpkg-path-filter
+
 ## auxiliary packages to be installed
 pkg_manual='lsof ncurses-base procps tzdata'
 pkg_auto='whiptail'
