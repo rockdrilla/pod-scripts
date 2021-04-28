@@ -128,13 +128,11 @@ if ! [ -s "${tremove}" ] ; then
 	exit 0
 fi
 
-## list affected packages except dpkg: it's affected almost all time
-## so we reconfigure it separately
+## list affected packages
 taffected=$(mktemp)
 find "${dpkg_info}/" -name '*.list' \
   -exec grep -Fxl -f "${tremove}" '{}' '+' | \
 sed -E 's/^.*\/([^/]+)\.list$/\1/' | \
-grep -Ev '^dpkg(:?|$)' | \
 sort -uV > "${taffected}"
 
 ## remove files already!
