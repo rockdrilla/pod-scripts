@@ -84,8 +84,9 @@ rm -rf \
 
 ## remove non-working scripts
 rm -rf \
-	/opt/cleanup.d \
-	/opt/cleanup.sh \
+	/opt/cleanup.d/apt-dpkg-related \
+	/opt/cleanup.d/dpkg-path-filter \
+	/opt/cleanup.d/dpkg.cfg.d \
 	/opt/interactive.sh
 
 ## remove empty directories
