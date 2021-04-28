@@ -131,7 +131,7 @@ bc --label "build.ts=${ts}"
 bc --label "debian.buildah=${buildah_version}"
 bc --label "debian.mmdebstrap=${mmdebstrap_version}"
 bc --label "debian.podman=${podman_version}"
-bc --label "tarball.hash.current=${tar_sha256}"
+bc --label "tarball.hash=${tar_sha256}"
 
 t_env=$(mktemp)
 grep -Ev '^(#|$)' < "${dir0}/env.sh" > "${t_env}"
