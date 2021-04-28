@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # (c) 2021, Konstantin Demin
 
+[ -d /var/lib/dpkg ] || exit 1
+
 [ -x /usr/bin/aptitude ] || exit 1
 
 ## bad, really bad things are done here...
@@ -22,8 +24,9 @@ fi
 
 dangling='~i~M!~aremove?and(~Rdepends:~aremove,!~Rdepends:!~aremove)'
 
-remove '~i~e^(apt|aptitude|dpkg|less|nano|vim)$'
-remove '~i~n^(adduser|debconf|dialog|login|mount|ncurses-term|passwd|sensible-utils|whiptail)$'
+remove '~i~e^(apt|aptitude|dpkg)$'
+remove '~i~n^(adduser|debconf|login|mount|passwd|whiptail)$'
+remove '~i~n^(ncurses-)'
 
 if [ $# -ne 0 ] ; then
 	batch keep "$@"
