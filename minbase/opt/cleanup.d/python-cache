@@ -10,8 +10,8 @@ set -e
 find / -maxdepth 1 -name '*.pyc' -type f -delete
 
 ## treewide
-find / -mindepth 1 -maxdepth 1 -type d -print0 | \
-grep -zEv '^/(sys|proc|dev)$' | \
-sort -zV | \
-xargs -0 -r -I'{}' \
+find / -mindepth 1 -maxdepth 1 -type d -print0 \
+| grep -zEv '^/(sys|proc|dev)$' \
+| sort -zV \
+| xargs -0 -r -I'{}' \
   find '{}' -mindepth 1 -name '*.pyc' -type f -delete

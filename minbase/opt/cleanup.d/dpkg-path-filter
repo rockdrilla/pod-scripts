@@ -16,12 +16,12 @@ ex|in)
 
 	result=$(mktemp -p "${RESULT_DIR}" "${action}.XXXXXXXX")
 
-	find / -mindepth 1 -maxdepth 1 -type d -print0 | \
-	grep -zEv '^/(sys|proc|dev)$' | \
-	sort -zV | \
-	xargs -0 -r -I'{}' \
-		find '{}' -mindepth 1 -path "${path_glob}" '!' -type d | \
-	sort -V > "${result}"
+	find / -mindepth 1 -maxdepth 1 -type d -print0 \
+	| grep -zEv '^/(sys|proc|dev)$' \
+	| sort -zV \
+	| xargs -0 -r -I'{}' \
+	  find '{}' -mindepth 1 -path "${path_glob}" '!' -type d \
+	| sort -V > "${result}"
 
 	exit 0
 ;;
@@ -64,8 +64,8 @@ if [ -s "${tfiles}" ] ; then
 		[ -s "${shallow_cfg}/${name}" ] && cat "${shallow_cfg}/${name}" >> "$t"
 
 		## remove trailing spaces, sort and remove duplicates
-		sed -E 's/ +$//;' < "$t" | \
-		sort -uV > "${shallow_cfg}/${name}"
+		sed -E 's/ +$//;' < "$t" \
+		| sort -uV > "${shallow_cfg}/${name}"
 	done < "${tfiles}"
 
 	rm "$t" ; unset t
@@ -78,9 +78,9 @@ rm -f "${tfiles}" ; unset tfiles
 ## merge all rules, reformat them like "(ex|in) /path/selector"
 ## and remove trailing spaces (again)
 tpath=$(mktemp)
-find "${shallow_cfg}/" -maxdepth 1 -type f -exec cat '{}' '+' | \
-sed -En "/${re_path}/{s//\\1 \\2/;s/ +\$//;p;}" | \
-sort -uV > "${tpath}"
+find "${shallow_cfg}/" -maxdepth 1 -type f -exec cat '{}' '+' \
+| sed -En "/${re_path}/{s//\\1 \\2/;s/ +\$//;p;}" \
+| sort -uV > "${tpath}"
 
 ## nothing to filter at all (again)
 if ! [ -s "${tpath}" ] ; then
@@ -96,13 +96,13 @@ rm -f "${tpath}" ; unset tpath
 
 ## merge results to "save list"
 tINclude=$(mktemp)
-find "${tparts}/" -mindepth 1 -name 'in.*' -exec cat '{}' '+' | \
-sort -uV > "${tINclude}"
+find "${tparts}/" -mindepth 1 -name 'in.*' -exec cat '{}' '+' \
+| sort -uV > "${tINclude}"
 
 ## merge results to "remove list"
 tEXclude=$(mktemp)
-find "${tparts}/" -mindepth 1 -name 'ex.*' -exec cat '{}' '+' | \
-sort -uV > "${tEXclude}"
+find "${tparts}/" -mindepth 1 -name 'ex.*' -exec cat '{}' '+' \
+| sort -uV > "${tEXclude}"
 
 rm -rf "${tparts}" ; unset tparts
 
@@ -130,10 +130,9 @@ fi
 
 ## list affected packages
 taffected=$(mktemp)
-find "${dpkg_info}/" -name '*.list' \
-  -exec grep -Fxl -f "${tremove}" '{}' '+' | \
-sed -E 's/^.*\/([^/]+)\.list$/\1/' | \
-sort -uV > "${taffected}"
+find "${dpkg_info}/" -name '*.list' -exec grep -Fxl -f "${tremove}" '{}' '+' \
+| sed -E 's/^.*\/([^/]+)\.list$/\1/' \
+| sort -uV > "${taffected}"
 
 ## remove files already!
 xargs -r rm -f < "${tremove}"

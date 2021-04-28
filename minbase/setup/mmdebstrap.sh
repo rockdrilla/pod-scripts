@@ -168,7 +168,8 @@ for i in \
 /usr/share/locale/ \
 ; do
 	[ -d "$1/$i" ] || continue
-	chroot "$1" find "$i" -xdev -mindepth 1 -maxdepth 1 -type d -exec /opt/tree-opt.sh '{}' ';'
+	chroot "$1" \
+	find "$i" -xdev -mindepth 1 -maxdepth 1 -type d -exec /opt/tree-opt.sh '{}' ';'
 done
 
 ## fix ownership:
