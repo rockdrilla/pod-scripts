@@ -13,3 +13,5 @@ path-exclude=/usr/share/locale/*
 
 path-include=/usr/share/aptitude/aptitude-defaults
 path-exclude=/usr/share/aptitude/*
+
+path-exclude=/usr/share/lintian/overrides/*
