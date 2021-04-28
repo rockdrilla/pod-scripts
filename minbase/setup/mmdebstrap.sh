@@ -6,7 +6,7 @@ set -e
 
 ## auxiliary packages to be installed
 pkg_manual='lsof ncurses-base procps tzdata'
-pkg_auto='dialog whiptail'
+pkg_auto='whiptail'
 
 ## default packages to be removed
 pkg_purge='e2fsprogs fdisk libext2fs2 libfdisk1 libss2 logsave'
