@@ -8,6 +8,7 @@ set -e
 
 ## remove apt cache and lists
 for i in /var/lib/apt/lists /var/cache/apt/archives ; do
+	[ -d "$i" ] || continue
 	find $i/ -mindepth 1 -type f -delete
 	install -o 0 -g 0 -m 0640 /dev/null $i/lock
 done
