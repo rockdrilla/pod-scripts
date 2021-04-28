@@ -8,9 +8,6 @@ set -e
 pkg_manual='lsof ncurses-base procps tzdata'
 pkg_auto='whiptail'
 
-## default packages to be removed
-pkg_purge='e2fsprogs fdisk libext2fs2 libfdisk1 libss2 logsave'
-
 ## script parameters:
 ## $1 - chroot path
 ## $2 - image name
@@ -136,9 +133,6 @@ chroot "$1" aptitude -y full-upgrade
 ## install auxiliary packages
 chroot "$1" aptitude -y install ${pkg_manual} ${pkg_auto}
 
-## remove unnecessary packages
-chroot "$1" dpkg --force-all --purge ${pkg_purge} || :
-
 ## mark most non-essential packages as auto-installed
 c=':'
 c="$c ; aptitude --schedule-only hold ${pkg_manual}"
@@ -147,9 +141,6 @@ c="$c ; aptitude --schedule-only unmarkauto ${pkg_manual}"
 c="$c ; aptitude --schedule-only unhold ${pkg_manual}"
 c="$c ; aptitude -y install"
 chroot "$1" sh -e -c "$c"
-
-## remove unnecessary packages (again - to ensure they're gone)
-chroot "$1" dpkg --force-all --purge ${pkg_purge} || :
 
 
 

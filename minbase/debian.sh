@@ -81,7 +81,7 @@ esac
 mmdebstrap \
   --verbose \
   --format=tar \
-  --variant=minbase \
+  --variant=apt \
   ${comps:+"--components=${comps}"} \
   --aptopt="${dir0}/setup/apt.conf" \
   --dpkgopt="${dir0}/setup/dpkg.cfg" \
