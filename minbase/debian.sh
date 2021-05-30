@@ -104,7 +104,7 @@ mmdebstrap \
   --customize-hook="sync-in '${dir0}/opt' /opt" \
   --customize-hook="sync-in '${dir0}/setup/apt.conf.d' /etc/apt/apt.conf.d" \
   --customize-hook="sync-in '${dir0}/setup/dpkg.cfg.d' /etc/dpkg/dpkg.cfg.d" \
-  --customize-hook="'${dir0}/setup/mmdebstrap.sh' \"\$1\" ${image} ${suite} ${uid} ${gid}" \
+  --customize-hook="'${dir0}/setup/mmdebstrap.sh' \"\$1\" ${distro} ${suite} ${uid} ${gid}" \
   --skip=cleanup/apt \
   ${suite} "${tarball}" || true
 

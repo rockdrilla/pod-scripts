@@ -12,7 +12,7 @@ pkg_auto='whiptail'
 
 ## script parameters:
 ## $1 - chroot path
-## $2 - image name
+## $2 - distro name
 ## $3 - suite name
 ## $4 - uid
 ## $5 - gid
@@ -31,70 +31,6 @@ rm -f "${t_env}"
 
 ## strip apt keyrings from sources.list:
 sed -E -i 's/ \[[^]]+]//' "$1/etc/apt/sources.list"
-
-## setup repositories and their priorities
-case "$2" in
-ubuntu*)
-	comp='main restricted universe multiverse'
-	aux_repo="$3-updates $3-proposed"
-	## setup repositories
-	{
-	for i in $3 ${aux_repo} ; do
-		echo "deb http://archive.ubuntu.com/ubuntu $i ${comp}"
-	done
-	echo "deb http://security.ubuntu.com/ubuntu $3-security ${comp}"
-	} > "$1/etc/apt/sources.list"
-	chmod 0644 "$1/etc/apt/sources.list"
-
-	aux_repo=''
-;;
-debian*)
-	comp='main contrib non-free'
-	prio=500 ; aux_repo=''
-	case "$3" in
-	testing)      prio=550 ; aux_repo='stable unstable' ;;
-	unstable)     prio=600 ; aux_repo='testing stable experimental' ;;
-	experimental) prio=650 ; aux_repo='unstable testing stable' ;;
-	*)
-		aux_repo="$3-updates $3-proposed-updates"
-		## setup repositories
-		{
-		for i in $3 ${aux_repo} ; do
-			echo "deb http://deb.debian.org/debian $i ${comp}"
-		done
-		echo "deb http://security.debian.org/debian-security $3/updates ${comp}"
-		} > "$1/etc/apt/sources.list"
-		chmod 0644 "$1/etc/apt/sources.list"
-
-		aux_repo=''
-	;;
-	esac
-
-	if [ -n "${aux_repo}" ] ; then
-		## setup repositories
-		for i in $3 ${aux_repo} ; do
-			echo "deb http://deb.debian.org/debian $i ${comp}"
-		done > "$1/etc/apt/sources.list"
-		chmod 0644 "$1/etc/apt/sources.list"
-
-		set +f
-
-		## setup repo priorities
-		for i in $3 ${aux_repo} ; do
-			cat <<-EOF
-				Package: *
-				Pin: release o=debian, a=$i
-				Pin-Priority: ${prio}
-
-			EOF
-			prio=$(( prio - 50 ))
-		done > "$1/etc/apt/preferences.d/00-local"
-		chmod 0644 "$1/etc/apt/preferences.d/00-local"
-
-		set -f
-	fi
-;;
-esac
 
 ## generic configuration
 
