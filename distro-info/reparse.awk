@@ -3,7 +3,7 @@
 # (c) 2021, Konstantin Demin
 
 ## input:  series version,created[,release[,eol[,eol-lts[,eol-elts]]]]
-## output: series version,is-release-sane,x-created[,x-release[,x-eol[,x-eol-lts[,x-eol-elts]]]]
+## output: series version,release,is-release-sane,x-created[,x-release[,x-eol[,x-eol-lts[,x-eol-elts]]]]
 
 function try_env(param, default,     x) {
 	x = ENVIRON[param];
@@ -56,6 +56,9 @@ function join(A, sep,     n, r, i) {
 		L[4] = A[1] "-12-31";
 	}
 
+	## preserve release date
+	reldate = L[3];
+
 	## remove dashes from dates, make them "numeric",
 	## and compare with (current) date
 	n = length(L);
@@ -84,6 +87,5 @@ function join(A, sep,     n, r, i) {
 		}
 	}
 
-	## output lists
-	print $1, join(L, OFS);
+	print $1, reldate, join(L, OFS);
 }

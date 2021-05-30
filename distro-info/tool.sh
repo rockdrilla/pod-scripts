@@ -132,6 +132,7 @@ if ! [ -s "$q" ] ; then
 	rm -f "$q" ; exit 1
 fi
 
+meta_ex() { cut -d ',' -f '1,2' ; }
 tag_ex() { cut -d ',' -f 1 ; }
 chan_ex() { cut -d ' ' -f 1 ; }
 
@@ -139,18 +140,17 @@ f_tags=$(mktemp)
 d_chan=$(mktemp -d)
 
 data_filter active < "$q" \
-| tag_ex \
+| meta_ex \
 > "${f_tags}"
 
-chan_ex < "${f_tags}" \
-| sort \
-| chan_ex > "${d_chan}/active"
+tag_ex < "${f_tags}" \
+| chan_ex \
+> "${d_chan}/active"
 
 filter_chan_ex() {
 	data_filter "$2" < "$1" \
 	| tag_ex \
 	| chan_ex \
-	| sort \
 	> "$3"
 }
 
@@ -168,9 +168,8 @@ rm -rf "$q" "$a" "$b"
 
 for s in lts stable testing ; do
 	while read -r c ; do
-		q=$(lookup "$c" < "${f_tags}")
-		[ -n "$q" ] || continue
-		echo "$q $s"
+		lookup "$c" < "${f_tags}" \
+		| sed -E "s/^([^,]+)(,.+)\$/\\1 $s\\2/"
 	done < "${d_chan}/$s"
 done
 rm -rf "${f_tags}" "${d_chan}"
