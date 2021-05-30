@@ -93,9 +93,14 @@ data_filter() {
 	FILT="$*" gawk -f "${dir0}/filter.awk"
 }
 
+## $1 - key
+field_search() {
+	printf '(%s[^,[:space:]]*(\s[^,]*)?|[^,]*\s%s[^,]*)' "$1" "$1"
+}
+
 ## $1 - release/series
 lookup() {
-	grep -Ei "^($1[^\s,]*\\s[^,]*|[^,]*\\s$1[^,]*)(,|\$)"
+	grep -Ei '^'"$(field_search "$1")"'(,|$)'
 }
 
 ## $1 - distro name
@@ -169,14 +174,15 @@ rm -rf "$a" "$b"
 for s in lts stable testing ; do
 	while read -r c ; do
 		lookup "$c" < "${f_tags}" \
-		| sed -E "s/^([^,]+)(,.+)\$/\\1 $s\\2/"
+		| sed -E "s/^(.+)\$/\\1,$s/"
 	done < "${d_chan}/$s"
 done > "$q"
 rm -rf "${f_tags}" "${d_chan}"
 
 ## secondary lookup (allows one to select release by meta tag)
 shift
-lookup "$@" < "$q"
+k=$(field_search "$1")
+grep -Ei '^'"($k|[^,]+,[^,]+,$k)"'(,|$)' < "$q"
 rm -rf "$q"
 
 exit 0
