@@ -65,7 +65,23 @@ function join(A, sep,     n, r, i) {
 			L[i] = 0;
 			continue;
 		}
-		L[i] = (now >= L[i]) ? 1 : 0;
+		if (i != 3) {
+			L[i] = (now >= L[i]) ? 1 : 0;
+			continue;
+		}
+		if (now >= L[i]) {
+			L[i] = 1;
+			continue;
+		}
+		## Ubuntu specific:
+		## mark channel as "released" when it's less than month
+		## before actual release
+		if ((L[i] - now) < 100) {
+			L[1] = 0;
+			L[i] = 1;
+		} else {
+			L[i] = 0;
+		}
 	}
 
 	## output lists

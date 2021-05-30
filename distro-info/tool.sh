@@ -138,11 +138,7 @@ chan_ex() { cut -d ' ' -f 1 ; }
 f_tags=$(mktemp)
 d_chan=$(mktemp -d)
 
-{
-	data_filter active < "$q"
-	data_filter testing < "$q"
-} \
-| uniq \
+data_filter active < "$q" \
 | tag_ex \
 > "${f_tags}"
 
