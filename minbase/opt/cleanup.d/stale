@@ -10,6 +10,5 @@ set -e
 rm -f \
   /var/cache/debconf/config.dat-old \
   /var/cache/debconf/templates.dat-old \
-  /var/lib/aptitude/pkgstates.old \
   /var/lib/dpkg/diversions-old \
   /var/lib/dpkg/status-old

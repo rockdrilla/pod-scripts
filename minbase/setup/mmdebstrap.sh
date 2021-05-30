@@ -56,20 +56,11 @@ EOF
 rm -f "$1/var/lib/man-db/auto-update"
 
 
-
-## update package lists; may fail sometimes,
-## e.g. soon-to-release channels like Debian "bullseye" @ 22.04.2021
-chroot "$1" apt update || :
-
-## install apt-utils first, then aptitude
-chroot "$1" apt -y install apt-utils
-chroot "$1" apt -y install aptitude
-
 ## perform full upgrade
-chroot "$1" aptitude -y full-upgrade
+chroot "$1" /opt/apt.sh full-upgrade
 
-## install auxiliary packages
-chroot "$1" aptitude -y install ${pkg_manual} ${pkg_auto}
+## install auxiliary packages (aptitude is installed too)
+chroot "$1" /opt/apt.sh install ${pkg_manual} ${pkg_auto}
 
 ## mark most non-essential packages as auto-installed
 c=':'
@@ -87,7 +78,7 @@ chroot "$1" /opt/tz.sh "${TZ}"
 
 
 
-## run cleanup
+## run cleanup (aptitude is to be removed)
 chroot "$1" /opt/cleanup.sh
 
 ## remove mmdebstrap artifacts

@@ -8,8 +8,4 @@ path-exclude=/usr/share/man/*
 path-include=/usr/share/locale/locale.alias
 path-exclude=/usr/share/locale/*
 
-path-include=/usr/share/aptitude/aptitude-defaults
-path-include=/usr/share/aptitude/section-descriptions
-path-exclude=/usr/share/aptitude/*
-
 path-exclude=/usr/share/lintian/overrides/*

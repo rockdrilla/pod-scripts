@@ -6,6 +6,11 @@ set -e
 
 [ -z "${VERBOSE}" ] || set -x -v
 
+## remove aptitude and apt-utils (with many thanks)
+apt -y purge aptitude apt-utils
+apt -y autoremove
+rm -rf /var/lib/aptitude
+
 ## remove apt cache and lists
 for i in /var/lib/apt/lists /var/cache/apt/archives ; do
 	[ -d "$i" ] || continue
@@ -14,12 +19,7 @@ for i in /var/lib/apt/lists /var/cache/apt/archives ; do
 done
 apt-get clean
 
-## remove directories
 rm -rf \
-  /var/lib/apt/lists/auxfiles
-
-## remove files
-rm -f \
+  /var/lib/apt/lists/auxfiles \
   /var/cache/apt/pkgcache.bin \
-  /var/cache/apt/srcpkgcache.bin \
-  /var/lib/aptitude/pkgstates
+  /var/cache/apt/srcpkgcache.bin

@@ -6,14 +6,12 @@ pkg_d='/var/cache/apt/archives'
 
 find "${pkg_d}/" -mindepth 1 -delete
 
-aptitude update
-
 ## hacky approach to speed up "aptitude reinstall '~i'":
 ## 1) download already installed packages
 ## 2) extract packages
 ## 3) reconfigure packages
 
-aptitude -y --download-only reinstall '~i'
+/opt/apt.sh --download-only reinstall '~i'
 ## don't bother with "base-files"
 find "${pkg_d}/" -name 'base-files_*.deb' -type f -delete
 
@@ -23,8 +21,11 @@ find "${pkg_d}/" -name '*.deb' -type f \
 dpkg-query --show --showformat='${binary:Package}\n' \
 | xargs -r dpkg-reconfigure -f
 
+## perform full upgrade
+/opt/apt.sh full-upgrade
+
 ## install useful packages :)
-aptitude -y --with-recommends install bash-completion curl file info less \
+/opt/apt.sh --with-recommends install bash-completion curl file info less \
                               man-db manpages manpages-dev nano ncurses-term \
                               psmisc sensible-utils vim wget
 
