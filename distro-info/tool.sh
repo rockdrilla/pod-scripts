@@ -131,7 +131,10 @@ query() {
 if [ $# -eq 0 ] ; then exit 1 ; fi
 
 q=$(mktemp)
-query "$1" > "$q"
+case $# in
+1) query "$1" | data_filter active ;;
+*) query "$1" ;;
+esac > "$q"
 
 if ! [ -s "$q" ] ; then
 	rm -f "$q" ; exit 1
@@ -144,13 +147,13 @@ chan_ex() { cut -d ' ' -f 1 ; }
 f_tags=$(mktemp)
 d_chan=$(mktemp -d)
 
-data_filter active < "$q" \
-| meta_ex \
-> "${f_tags}"
+meta_ex < "$q" > "${f_tags}"
+
+f_query="${d_chan}/query"
 
 tag_ex < "${f_tags}" \
 | chan_ex \
-> "${d_chan}/active"
+> "${f_query}"
 
 filter_chan_ex() {
 	data_filter "$2" < "$1" \
@@ -163,20 +166,35 @@ a=$(mktemp) ; b=$(mktemp)
 for s in stable testing lts ; do
 	filter_chan_ex "$q" "$s" "${d_chan}/$s"
 
-	grep -Fx  -f "${d_chan}/$s" < "${d_chan}/active" > "$a"
-	grep -Fxv -f "${d_chan}/$s" < "${d_chan}/active" > "$b"
+	grep -Fx  -f "${d_chan}/$s" < "${f_query}" > "$a"
+	grep -Fxv -f "${d_chan}/$s" < "${f_query}" > "$b"
 
 	cat < "$a" > "${d_chan}/$s"
-	cat < "$b" > "${d_chan}/active"
+	cat < "$b" > "${f_query}"
 done
 rm -rf "$a" "$b"
 
-for s in lts stable testing ; do
+{
+	for s in lts stable testing ; do
+		while read -r c ; do
+			lookup "$c" < "${f_tags}" \
+			| sed -E "s/^(.+)\$/\\1,$s/"
+		done < "${d_chan}/$s"
+	done
+
+	## Debian specific:
+	## add tag 'unstable' to 'sid'
+	if [ "$1" = 'debian' ] ; then
+		lookup "sid" < "${f_tags}" \
+		| sed -E "s/^(.+)\$/\\1,unstable/"
+	fi
+
+	## last resort
 	while read -r c ; do
-		lookup "$c" < "${f_tags}" \
-		| sed -E "s/^(.+)\$/\\1,$s/"
-	done < "${d_chan}/$s"
-done > "$q"
+		lookup "$c" < "${f_tags}"
+	done < "${f_query}"
+} > "$q"
+
 rm -rf "${f_tags}" "${d_chan}"
 
 ## secondary lookup (allows one to select release by meta tag)

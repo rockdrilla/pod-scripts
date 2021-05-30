@@ -25,16 +25,16 @@ function join(A, sep,     n, r, i) {
 
 ## line parser
 {
-	## Debian specific:
-	## skip entries with empty "version"
-	if ($1 == "") next;
-
 	## init Tag list with series as 1st tag
 	split($3, T);
-	## Ubuntu specific:
-	## select 1st word from version
-	split($1, A, " ");
-	push(T, A[1]);
+	## Debian specific:
+	## "virtual" releases don't have version
+	if ($1 != "") {
+		## Ubuntu specific:
+		## select 1st word from version
+		split($1, A, " ");
+		push(T, A[1]);
+	}
 
 	## init output list with "created" (4th field) as 1st field
 	split($4, L);
