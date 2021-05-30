@@ -32,7 +32,7 @@ repo_base='https://github.com/rockdrilla/pod-scripts'
 repo_contact="${repo_base}/issues/new/choose"
 self_upstream="${repo_base}.git /${name0}"
 
-sha256() { sha256sum -b "$1" | grep -Eio '^[0-9a-f]+' | tr '[A-F]' '[a-f]' ; }
+sha256() { sha256sum -b "$1" | sed -En '/^([[:xdigit:]]+).*$/{s//\L\1/;p;}' ; }
 
 self_sha256=$(sha256 "$0")
 
@@ -78,12 +78,14 @@ reldate=$(echo "${meta}" | cut -d ',' -f 2)
 reldate=$(date -u -d "${reldate}" '+%s')
 export SOURCE_DATE_EPOCH=${reldate}
 
-tag="${suite}-"$(date '+%Y%m%d%H%M%S' -d @${ts})
+tag="${suite}-"$(date '+%Y%m%d%H%M%S' -d "@${ts}")
 
 tarball=$(mktemp -u)'.tar'
 
-## hack for libpam-tmpdir : we need 'shared' /tmp not per-user one :)
-orig_tmp="${TMPDIR}" ; TMPDIR=/tmp TEMPDIR=/tmp TMP=/tmp TEMP=/tmp
+## hack for mmdebstrap and libpam-tmpdir:
+## we need 'shared' /tmp not per-user one :)
+orig_tmp="${TMPDIR}"
+export TMPDIR=/tmp TEMPDIR=/tmp TMP=/tmp TEMP=/tmp
 
 uid=$(ps -n -o euid= -p $$)
 gid=$(ps -n -o egid= -p $$)
@@ -106,7 +108,13 @@ mmdebstrap \
   --customize-hook="sync-in '${dir0}/setup/dpkg.cfg.d' /etc/dpkg/dpkg.cfg.d" \
   --customize-hook="'${dir0}/setup/mmdebstrap.sh' \"\$1\" ${distro} ${suite} ${uid} ${gid}" \
   --skip=cleanup/apt \
-  ${suite} "${tarball}" || true
+  "${suite}" "${tarball}" || true
+
+## restore per-user /tmp (if any)
+if [ -n "${orig_tmp}" ] ; then
+	export TMP="${orig_tmp}"
+	export TMPDIR="${TMP}" TEMPDIR="${TMP}" TEMP="${TMP}"
+fi
 
 if ! tar -tf "${tarball}" >/dev/null 2>/dev/null ; then
 	rm "${tarball}"
@@ -151,10 +159,10 @@ bc --label "tarball.hash=${tar_sha256}"
 
 t_env=$(mktemp)
 grep -Ev '^(#|$)' < "${dir0}/env.sh" > "${t_env}"
-while read L ; do bc --env "$L" ; done < "${t_env}"
+while read -r L ; do bc --env "$L" ; done < "${t_env}"
 rm -f "${t_env}"
 
-buildah commit --squash --timestamp ${ts} "$c" "${image}:${tag}" || true
+buildah commit --squash --timestamp "${ts}" "$c" "${image}:${tag}" || true
 
 buildah rm "$c"
 podman image rm "$k"

@@ -21,7 +21,7 @@ pkg_auto='whiptail'
 f_env=$(dirname "$0")'/../env.sh'
 t_env=$(mktemp)
 grep -Ev '^(#|$)' < "${f_env}" > "${t_env}"
-while read L ; do
+while read -r L ; do
 	case "$L" in
 	PATH=*) ;;
 	*) export "$L" ;;
