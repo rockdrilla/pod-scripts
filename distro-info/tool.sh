@@ -126,7 +126,7 @@ query() {
 if [ $# -eq 0 ] ; then exit 1 ; fi
 
 q=$(mktemp)
-query "$@" > "$q"
+query "$1" > "$q"
 
 if ! [ -s "$q" ] ; then
 	rm -f "$q" ; exit 1
@@ -164,14 +164,19 @@ for s in stable testing lts ; do
 	cat < "$a" > "${d_chan}/$s"
 	cat < "$b" > "${d_chan}/active"
 done
-rm -rf "$q" "$a" "$b"
+rm -rf "$a" "$b"
 
 for s in lts stable testing ; do
 	while read -r c ; do
 		lookup "$c" < "${f_tags}" \
 		| sed -E "s/^([^,]+)(,.+)\$/\\1 $s\\2/"
 	done < "${d_chan}/$s"
-done
+done > "$q"
 rm -rf "${f_tags}" "${d_chan}"
+
+## secondary lookup (allows one to select release by meta tag)
+shift
+lookup "$@" < "$q"
+rm -rf "$q"
 
 exit 0
