@@ -19,7 +19,8 @@ fi
 dir0=$(dirname "$0")
 name0=$(basename "$0")
 
-image=$(echo "${name0}" | sed -E 's/\.[^.]+$//')'-minbase'
+distro=$(echo "${name0}" | sed -E 's/\.[^.]+$//')
+image="${distro}-minbase"
 
 ## resolve real file
 name0=$(readlink -e "$0")
@@ -46,21 +47,36 @@ buildah_version=$(pkg_ver buildah)
 podman_version=$(pkg_ver podman)
 
 
+suite_from_meta() { cut -d ',' -f 1 | cut -d ' ' -f 1 ; }
+meta=
 suite=
-case "${image}" in
-debian*) suite=unstable ;;
-ubuntu*) suite=hirsute ;;
+case "${distro}" in
+debian)
+	suite=unstable
+	meta=$("${dir0}/../distro-info/tool.sh" "${distro}" "${suite}")
+	;;
+ubuntu)
+	meta=$("${dir0}/../distro-info/tool.sh" "${distro}" | tail -n 1)
+	suite=$(echo "${meta}" | suite_from_meta)
+	;;
 esac
+[ -n "${meta}" ]
 [ -n "${suite}" ]
 
 if [ -n "$1" ] ; then
-	x=$(printf '%s' "$1"  | tr -d '[a-z]' | wc -c)
-	if [ "$x" = "0" ] ; then
-		suite=$1
+	x=$("${dir0}/../distro-info/tool.sh" "${distro}" "$1" | tail -n 1)
+	y=$(echo "$x" | suite_from_meta)
+	if [ -n "$x" ] ; then
+		meta="$x"
+		suite="$y"
 	else
 		echo "parameter '$1' looks spoiled, defaulting to '${suite}'" 1>&2
 	fi
 fi
+
+reldate=$(echo "${meta}" | cut -d ',' -f 2)
+reldate=$(date -u -d "${reldate}" '+%s')
+export SOURCE_DATE_EPOCH=${reldate}
 
 tag="${suite}-"$(date '+%Y%m%d%H%M%S' -d @${ts})
 
@@ -73,9 +89,9 @@ uid=$(ps -n -o euid= -p $$)
 gid=$(ps -n -o egid= -p $$)
 
 comps=''
-case "${image}" in
-debian*) comps='main,contrib,non-free' ;;
-ubuntu*) comps='main,restricted,universe,multiverse' ;;
+case "${distro}" in
+debian) comps='main,contrib,non-free' ;;
+ubuntu) comps='main,restricted,universe,multiverse' ;;
 esac
 
 mmdebstrap \
