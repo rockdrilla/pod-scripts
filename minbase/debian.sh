@@ -47,30 +47,33 @@ buildah_version=$(pkg_ver buildah)
 podman_version=$(pkg_ver podman)
 
 
+get_meta() { "${dir0}/../distro-info/tool.sh" "$@" ; }
 suite_from_meta() { cut -d ',' -f 1 | cut -d ' ' -f 1 ; }
 meta=
 suite=
 case "${distro}" in
 debian)
 	suite=unstable
-	meta=$("${dir0}/../distro-info/tool.sh" "${distro}" "${suite}")
+	meta=$(get_meta "${distro}" "${suite}")
 	;;
 ubuntu)
-	meta=$("${dir0}/../distro-info/tool.sh" "${distro}" | tail -n 1)
+	meta=$(get_meta "${distro}" | tail -n 1)
 	suite=$(echo "${meta}" | suite_from_meta)
 	;;
 esac
 [ -n "${meta}" ]
 [ -n "${suite}" ]
 
-if [ -n "$1" ] ; then
-	x=$("${dir0}/../distro-info/tool.sh" "${distro}" "$1" | tail -n 1)
-	y=$(echo "$x" | suite_from_meta)
-	if [ -n "$x" ] ; then
-		meta="$x"
-		suite="$y"
-	else
-		echo "parameter '$1' looks spoiled, defaulting to '${suite}'" 1>&2
+if [ "${distro}|$1" != "debian|${suite}" ] ; then
+	if [ -n "$1" ] ; then
+		x=$(get_meta "${distro}" "$1" | tail -n 1)
+		y=$(echo "$x" | suite_from_meta)
+		if [ -n "$x" ] ; then
+			meta="$x"
+			suite="$y"
+		else
+			echo "parameter '$1' looks spoiled, defaulting to '${suite}'" 1>&2
+		fi
 	fi
 fi
 
@@ -145,8 +148,9 @@ fi
 
 f=$(printf 'bc() { buildah config "$@" %s ; }' "$c") ; eval "$f"
 
-bc --hostname debian
-bc --comment "basic Debian image"
+bc --hostname "${distro}"
+distro_title=$(echo "${distro}" | sed -E 's/^(.)/\u\1/')
+bc --comment "basic ${distro_title} image"
 bc --label "build.script.commit=${self_version:-none}"
 bc --label "build.script.contact=${repo_contact}"
 bc --label "build.script.hash=${self_sha256}"
