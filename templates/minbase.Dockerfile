@@ -3,7 +3,7 @@
 
 ARG DISTRO=debian
 ARG SUITE=unstable
-FROM docker.io/rockdrilla/$DISTRO-minbase:$SUITE
+FROM rockdrilla/$DISTRO-minbase:$SUITE
 
 ## please issue '/opt/cleanup.sh' as last RUN command in your images
 

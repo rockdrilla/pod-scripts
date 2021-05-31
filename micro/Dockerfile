@@ -4,7 +4,7 @@
 #################################################
 ARG DISTRO=debian
 ARG SUITE=unstable
-FROM docker.io/rockdrilla/$DISTRO-minbase:$SUITE AS base
+FROM rockdrilla/$DISTRO-minbase:$SUITE AS base
 
 #################################################
 

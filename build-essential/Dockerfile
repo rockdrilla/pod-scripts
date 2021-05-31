@@ -3,7 +3,7 @@
 
 ARG DISTRO=debian
 ARG SUITE=unstable
-FROM docker.io/rockdrilla/$DISTRO-minbase:$SUITE
+FROM rockdrilla/$DISTRO-minbase:$SUITE
 
 RUN /opt/apt.sh --with-recommends install \
         autoconf autoconf-archive automake bison build-essential bzr curl \

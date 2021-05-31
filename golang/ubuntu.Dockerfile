@@ -6,9 +6,9 @@ ARG UBUNTU_VERSION=latest
 
 #################################################
 
-FROM docker.io/rockdrilla/golang:pure-$GOLANG_VERSION AS pure
+FROM rockdrilla/golang:pure-$GOLANG_VERSION AS pure
 
-FROM docker.io/rockdrilla/ubuntu-minbase:$UBUNTU_VERSION
+FROM rockdrilla/ubuntu-minbase:$UBUNTU_VERSION
 
 ENV GOROOT="/usr/local/go"
 ENV GOPATH="/go"

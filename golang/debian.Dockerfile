@@ -6,9 +6,9 @@ ARG DEBIAN_VERSION=latest
 
 #################################################
 
-FROM docker.io/rockdrilla/golang:pure-$GOLANG_VERSION AS pure
+FROM rockdrilla/golang:pure-$GOLANG_VERSION AS pure
 
-FROM docker.io/rockdrilla/debian-minbase:$DEBIAN_VERSION
+FROM rockdrilla/debian-minbase:$DEBIAN_VERSION
 
 ENV GOROOT="/usr/local/go"
 ENV GOPATH="/go"

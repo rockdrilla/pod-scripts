@@ -6,7 +6,7 @@ ARG ALPINE_VERSION=latest
 
 #################################################
 
-FROM docker.io/rockdrilla/golang:pure-$GOLANG_VERSION AS pure
+FROM rockdrilla/golang:pure-$GOLANG_VERSION AS pure
 
 FROM alpine:$ALPINE_VERSION
 

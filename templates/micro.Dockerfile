@@ -3,7 +3,7 @@
 
 ARG DISTRO=debian
 ARG SUITE=unstable
-FROM docker.io/rockdrilla/$DISTRO-minbase:$SUITE AS base
+FROM rockdrilla/$DISTRO-minbase:$SUITE AS base
 
 ## NB: "base" image should contain relevant package lists!
 RUN /opt/apt.sh
@@ -23,7 +23,7 @@ RUN /opt/cleanup.sh
 
 ARG DISTRO=debian
 ARG SUITE=unstable
-FROM docker.io/rockdrilla/$DISTRO-micro:$SUITE
+FROM rockdrilla/$DISTRO-micro:$SUITE
 
 COPY --from=stage  /  /
 
