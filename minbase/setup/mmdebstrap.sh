@@ -7,8 +7,7 @@ set -e
 chroot "$1" /opt/cleanup.d/dpkg-path-filter
 
 ## auxiliary packages to be installed
-pkg_manual='lsof ncurses-base procps tzdata'
-pkg_auto='whiptail'
+pkg_aux='lsof ncurses-base procps tzdata vim-tiny whiptail'
 
 ## script parameters:
 ## $1 - chroot path
@@ -60,14 +59,14 @@ rm -f "$1/var/lib/man-db/auto-update"
 chroot "$1" /opt/apt.sh full-upgrade
 
 ## install auxiliary packages (aptitude is installed too)
-chroot "$1" /opt/apt.sh install ${pkg_manual} ${pkg_auto}
+chroot "$1" /opt/apt.sh install ${pkg_aux}
 
 ## mark most non-essential packages as auto-installed
 c=':'
-c="$c ; aptitude --schedule-only hold ${pkg_manual}"
+c="$c ; aptitude --schedule-only hold ${pkg_aux}"
 c="$c ; aptitude --schedule-only markauto '~i!~E!~M'"
-c="$c ; aptitude --schedule-only unmarkauto ${pkg_manual}"
-c="$c ; aptitude --schedule-only unhold ${pkg_manual}"
+c="$c ; aptitude --schedule-only unmarkauto ${pkg_aux}"
+c="$c ; aptitude --schedule-only unhold ${pkg_aux}"
 c="$c ; aptitude -y install"
 chroot "$1" sh -e -c "$c"
 
@@ -75,6 +74,10 @@ chroot "$1" sh -e -c "$c"
 
 ## timezone
 chroot "$1" /opt/tz.sh "${TZ}"
+
+## install vim-tiny as variant for vim
+vim=/usr/bin/vim
+chroot "$1" update-alternatives --install ${vim} vim ${vim}.tiny 1
 
 
 
