@@ -2,7 +2,7 @@
 # (c) 2021, Konstantin Demin
 
 #################################################
-FROM docker.io/rockdrilla/build-essential:unstable AS base
+FROM docker.io/rockdrilla/build-essential:debian-unstable AS base
 
 WORKDIR /tmp
 
