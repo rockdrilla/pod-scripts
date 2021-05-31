@@ -29,7 +29,7 @@ RUN if [ "$GOLANG_VERSION" = 'latest' ] ; then \
 #################################################
 FROM buildbase AS golang-dist
 
-RUN aptitude update && aptitude -y install golang-go
+RUN /opt/apt.sh install golang-go
 
 #################################################
 FROM golang-dist AS env-common

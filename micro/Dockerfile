@@ -23,4 +23,5 @@ ENV TEMP="/tmp"
 ENV TZ="Etc/UTC"
 
 COPY finalize.sh /opt/
+RUN /opt/apt.sh
 RUN /opt/finalize.sh

@@ -6,7 +6,7 @@ ARG SUITE=unstable
 FROM docker.io/rockdrilla/$DISTRO-minbase:$SUITE AS base
 
 ## NB: "base" image should contain relevant package lists!
-RUN aptitude update || :
+RUN /opt/apt.sh
 
 #################################################
 
@@ -14,8 +14,8 @@ FROM base AS stage
 
 ## NB: desired package list is also specified below
 ## in clause "RUN /opt/finalize.sh"
-RUN aptitude -y full-upgrade ; \
-    aptitude -y install default-jre-headless git gcc
+RUN /opt/apt.sh full-upgrade && \
+    /opt/apt.sh install default-jre-headless git gcc
 
 RUN /opt/cleanup.sh
 

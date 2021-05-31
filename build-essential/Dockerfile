@@ -5,8 +5,7 @@ ARG DISTRO=debian
 ARG SUITE=unstable
 FROM docker.io/rockdrilla/$DISTRO-minbase:$SUITE
 
-RUN aptitude update ; \
-    aptitude -y --with-recommends install \
+RUN /opt/apt.sh --with-recommends install \
         autoconf autoconf-archive automake bison build-essential bzr curl \
         debhelper dwarves dwz flex gettext gfortran git gnulib gnupg libtool \
         mercurial pkg-config psmisc subversion unzip wget zip
