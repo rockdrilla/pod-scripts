@@ -169,16 +169,28 @@ build_minbase() {
 
 		list_images "\|[^|]+/$1-minbase\|${suite}" \
 		| while IFS='|' read -r h p t ; do
+			c=$(basename "$p")
 
 			hash1=$(tarball_hash_local "$h")
 
 			if [ "${hash0}" = "${hash1}" ] ; then
+				## tags may change even image itself doesn't change 
+				for t in $(chan_tag "${suite}") latest ; do
+					hashT=${hash1}
+					if [ -n "$t" ] ; then
+						hashT=$(tarball_hash_remote "${REG}/$1-minbase:$t")
+					fi
+
+					if [ "${hashT}" != "${hash1}" ] ; then
+						image_1_push "$h" "$t" "$c:%s"
+					fi
+				done
+
 				sed -E -i "/^${suite}/d" "$1.chan"
 				image_rm "$h"
 				continue
 			fi
 
-			c=$(basename "$p")
 			image_3_push "$h" "$1" "${suite}" "$c:%s"
 		done
 	done
