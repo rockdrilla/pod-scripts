@@ -40,13 +40,21 @@ image_push() {
 	podman push "$1" "$2"
 	podman pull "$2"
 }
+
 ## $1 - hash image id
 ## $2 - tag
 ## $3 - printf formatted image name
-image_x_push() {
+image_1_push() {
+	i="${REG}/"$(printf "$3" "$2")
+	image_push "$1" "$i"
+}
+
+## $1 - hash image id
+## $2 - tag
+## $3 - printf formatted image name
+image_2_push() {
 	for k in "$2" latest ; do
-		i="${REG}/"$(printf "$3" "$k")
-		image_push "$1" "$i"
+		image_1_push "$1" "$k" "$3"
 	done
 }
 
@@ -54,10 +62,9 @@ image_x_push() {
 ## $2 - distro
 ## $3 - suite
 ## $4 - printf formatted image name
-image_z_push() {
+image_3_push() {
 	for k in $(meta_query "$2" "$3") ; do
-		i="${REG}/"$(printf "$4" "$k")
-		image_push "$1" "$i"
+		image_1_push "$1" "$k" "$4"
 	done
 }
 
@@ -162,6 +169,7 @@ build_minbase() {
 
 		list_images "\|[^|]+/$1-minbase\|${suite}" \
 		| while IFS='|' read -r h p t ; do
+
 			hash1=$(tarball_hash_local "$h")
 
 			if [ "${hash0}" = "${hash1}" ] ; then
@@ -171,7 +179,7 @@ build_minbase() {
 			fi
 
 			c=$(basename "$p")
-			image_z_push "$h" "$1" "${suite}" "$c:%s"
+			image_3_push "$h" "$1" "${suite}" "$c:%s"
 		done
 	done
 }
@@ -192,7 +200,7 @@ build_micro() {
 	list_images "\|[^|]+/$1-micro\|" \
 	| while IFS='|' read -r h p t ; do
 		c=$(basename "$p")
-		image_z_push "$h" "$1" "$t" "$c:%s"
+		image_3_push "$h" "$1" "$t" "$c:%s"
 	done
 }
 
@@ -212,7 +220,7 @@ build_essential() {
 		list_images "\|[^|]+/build-essential\|$1-${suite}" \
 		| while IFS='|' read -r h p t ; do
 			c=$(basename "$p")
-			image_z_push "$h" "$1" "${suite}" "$c:$1-%s"
+			image_3_push "$h" "$1" "${suite}" "$c:$1-%s"
 		done
 	done < "$1.chan"
 }
@@ -244,7 +252,7 @@ if ! skopeo inspect "${REG}/golang:pure-${golang_ver}" >/dev/null 2>/dev/null ; 
 	list_images '\|[^|]+/golang\|pure$' \
 	| while IFS='|' read -r h p t ; do
 		c=$(basename "$p")
-		image_x_push "$h" "${golang_ver}" "$c:$t-%s"
+		image_2_push "$h" "${golang_ver}" "$c:$t-%s"
 	done
 fi
 
@@ -266,7 +274,7 @@ build_golang_blend() {
 	list_images "\|[^|]+/golang\|$2\$" \
 	| while IFS='|' read -r h p t ; do
 		c=$(basename "$p")
-		image_x_push "$h" "$1" "$c:$2-%s"
+		image_2_push "$h" "$1" "$c:$2-%s"
 	done
 }
 
