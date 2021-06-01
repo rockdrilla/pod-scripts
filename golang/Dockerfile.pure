@@ -11,7 +11,7 @@ RUN chmod +x /tmp/*.sh
 
 RUN mkdir -p /usr/local/go /tmp/go ; \
     install -m 0777 -d /go ; \
-    install -m 0777 -d /go/src /go/bin /go/tmp
+    install -m 0777 -d /go/src /go/bin /go/tmp /go/build
 
 #################################################
 FROM base AS buildbase
@@ -86,6 +86,7 @@ FROM scratch
 
 ENV GOROOT="/usr/local/go"
 ENV GOPATH="/go"
+ENV GOCACHE="/go/build"
 
 ENV PATH="/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 ENV LANG="C.UTF-8"
