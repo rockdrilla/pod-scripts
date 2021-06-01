@@ -18,10 +18,10 @@ ENV PATH="/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/us
 ENV LANG="C.UTF-8"
 ENV LC_ALL="C.UTF-8"
 ENV TERM="xterm"
-ENV TMPDIR="tmp"
-ENV TMP="tmp"
-ENV TEMPDIR="tmp"
-ENV TEMP="tmp"
+ENV TMPDIR="/tmp"
+ENV TMP="/tmp"
+ENV TEMPDIR="/tmp"
+ENV TEMP="/tmp"
 
 WORKDIR /go
 
