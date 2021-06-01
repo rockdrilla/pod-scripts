@@ -18,7 +18,7 @@ FROM base AS buildbase
 
 ARG GOLANG_VERSION=latest
 
-RUN /tmp/latest.sh $GOLANG_VERSION /tmp/go.tar.gz
+RUN /tmp/tarball.sh $GOLANG_VERSION /tmp/go.tar.gz
 
 #################################################
 FROM buildbase AS golang-dist
@@ -26,7 +26,8 @@ FROM buildbase AS golang-dist
 RUN /opt/apt.sh install golang-go
 RUN /opt/cleanup.sh
 
-COPY --from=buildbase  /tmp/go.tar.gz  /tmp/go.tar.gz
+COPY --from=buildbase  /tmp/*.sh       /tmp/
+COPY --from=buildbase  /tmp/go.tar.gz  /tmp/
 
 #################################################
 FROM golang-dist AS env-common
