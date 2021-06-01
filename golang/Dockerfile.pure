@@ -6,7 +6,7 @@ FROM rockdrilla/build-essential:debian-unstable AS base
 
 WORKDIR /tmp
 
-COPY *.sh /tmp/
+COPY  *.sh  /tmp/
 RUN chmod +x /tmp/*.sh
 
 RUN mkdir -p /usr/local/go /tmp/go ; \
@@ -61,8 +61,8 @@ RUN p="/usr/local/go" ; export DEB_BUILD_MAINT_OPTIONS='hardening=+all' ; \
 #################################################
 FROM golang-dist AS stage1
 
-COPY --from=env-common  /tmp/env        /tmp/
-COPY --from=env-stage1  /tmp/env.stage1 /tmp/env.stage1
+COPY --from=env-common  /tmp/env         /tmp/
+COPY --from=env-stage1  /tmp/env.stage1  /tmp/env.stage1
 
 RUN export GOROOT_BOOTSTRAP="$(go env GOROOT)" ; \
     . /tmp/env ; . /tmp/env.stage1 ; \
@@ -71,9 +71,9 @@ RUN export GOROOT_BOOTSTRAP="$(go env GOROOT)" ; \
 #################################################
 FROM buildbase AS stage2
 
-COPY --from=env-common  /tmp/env        /tmp/
-COPY --from=env-stage2  /tmp/env.stage2 /tmp/env.stage2
-COPY --from=stage1      /tmp/go/        /tmp/go/
+COPY --from=env-common  /tmp/env         /tmp/
+COPY --from=env-stage2  /tmp/env.stage2  /tmp/env.stage2
+COPY --from=stage1      /tmp/go/         /tmp/go/
 
 RUN export GOROOT_BOOTSTRAP="/tmp/go" ; \
     export PATH="/tmp/go/bin:${PATH}" ; \
