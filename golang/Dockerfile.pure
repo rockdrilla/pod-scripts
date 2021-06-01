@@ -6,6 +6,9 @@ FROM rockdrilla/build-essential:debian-unstable AS base
 
 WORKDIR /tmp
 
+COPY *.sh /tmp/
+RUN chmod +x /tmp/*.sh
+
 RUN mkdir -p /usr/local/go /tmp/go ; \
     install -m 0777 -d /go ; \
     install -m 0777 -d /go/src /go/bin /go/tmp
@@ -15,16 +18,7 @@ FROM base AS buildbase
 
 ARG GOLANG_VERSION=latest
 
-RUN if [ "$GOLANG_VERSION" = 'latest' ] ; then \
-        curl -qsSL 'https://golang.org/dl/' \
-        | URI='https://golang.org' perl -ne 'while(m/(?<=href=)([\x22\x27])(.+?)\1(.*)$/){$_=$3;my $s=$2;$s="$ENV{URI}$s" if $s !~ m/^[[:alnum:]]+?:/;print "$s\n";}' \
-        | grep -m 1 -E '/go[^/]+\.src\.tar\.(gz|xz|bz2|zstd?)$' ; \
-    else \
-        echo "https://golang.org/dl/go$GOLANG_VERSION.src.tar.gz" ; \
-    fi \
-    | tee /dev/stderr \
-    | xargs -r curl -sSL > /tmp/go.tar.gz ; \
-    tar -tf /tmp/go.tar.gz >/dev/null
+RUN /tmp/latest.sh $GOLANG_VERSION /tmp/go.tar.gz
 
 #################################################
 FROM buildbase AS golang-dist
@@ -68,16 +62,7 @@ COPY --from=env-stage1  /tmp/env.stage1 /tmp/env.stage1
 
 RUN export GOROOT_BOOTSTRAP="$(go env GOROOT)" ; \
     . /tmp/env ; . /tmp/env.stage1 ; \
-    p="/tmp" ; \
-    tar -C "$p" -xf /tmp/go.tar.gz ; \
-    cd "$p/go/src/" ; ./make.bash ; \
-    [ -x "$p/go/bin/go" ]
-RUN p="/tmp" ; \
-    export PATH="$p/go/bin:${PATH}" ; \
-    go install std
-RUN cd /tmp/go/ ; \
-    rm -rf pkg/*/cmd pkg/bootstrap pkg/obj pkg/tool/*/api \
-    pkg/tool/*/go_bootstrap src/cmd/dist/dist
+    /tmp/build.sh /tmp /tmp/go.tar.gz
 
 #################################################
 FROM buildbase AS stage2
@@ -89,16 +74,7 @@ COPY --from=stage1      /tmp/go/        /tmp/go/
 RUN export GOROOT_BOOTSTRAP="/tmp/go" ; \
     export PATH="/tmp/go/bin:${PATH}" ; \
     . /tmp/env ; . /tmp/env.stage2 ; \
-    p="/usr/local" ; \
-    tar -C "$p" -xf /tmp/go.tar.gz ; \
-    cd "$p/go/src/" ; ./make.bash ; \
-    [ -x "$p/go/bin/go" ]
-RUN p="/usr/local" ; \
-    export PATH="$p/go/bin:${PATH}" ; \
-    go install std
-RUN cd /usr/local/go/ ; \
-    rm -vrf pkg/*/cmd pkg/bootstrap pkg/obj pkg/tool/*/api \
-    pkg/tool/*/go_bootstrap src/cmd/dist/dist
+    /tmp/build.sh /usr/local /tmp/go.tar.gz
 
 RUN /opt/cleanup.sh
 

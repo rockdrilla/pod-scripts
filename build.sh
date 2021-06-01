@@ -77,7 +77,7 @@ bud() { buildah bud --isolation chroot --network host --format docker -f "$@" ; 
 
 image_ts() {
 	{
-		echo 1
+		echo 0
 		skopeo inspect "$1" \
 		| jq -r 'select(has("Created")) | ."Created"' \
 		| xargs -r -L 1 date -u '+%s' -d
@@ -242,31 +242,26 @@ build_essential ubuntu
 
 ## build 'golang'
 
-t='golang-latest'
-curl -qsSL 'https://golang.org/dl/' \
-| URI='https://golang.org' perl -ne 'while(m/(?<=href=)([\x22\x27])(.+?)\1(.*)$/){$_=$3;my $s=$2;$s="$ENV{URI}$s" if $s !~ m/^[[:alnum:]]+?:/;print "$s\n";}' \
-| sed -En '/^.+\/go([^/]+)\.src\.[^/]+$/{s//\1/;p;}' \
-| head -n 1 > "$t"
-golang_ver=$(cat "$t")
-rm -f "$t"
+golang_ver=$("${dir0}/golang/latest.sh")
+while : ; do
+	[ -z "${golang_ver}" ] && break
 
-if ! skopeo inspect "${REG}/golang:pure-${golang_ver}" >/dev/null 2>/dev/null ; then
+	t=$(image_ts "${REG}/golang:pure-${golang_ver}" 2>/dev/null)
+	[ "$t" = '0' ] && break
+
 	bud "${dir0}/golang/Dockerfile.pure" \
 		-t golang:pure \
-		${golang_ver:+--build-arg GOLANG_VERSION=${golang_ver}} \
+		--build-arg "GOLANG_VERSION=${golang_ver}" \
 	"${dir0}/golang"
-
-	if [ -z "${golang_ver}" ] ; then
-		golang_ver=$(podman run --rm golang:pure version \
-		| sed -En '/^go version go([0-9.]+) .*$/{s##\1#;p;}')
-	fi
 
 	list_images '\|[^|]+/golang\|pure$' \
 	| while IFS='|' read -r h p t ; do
 		c=$(basename "$p")
 		image_2_push "$h" "${golang_ver}" "$c:$t-%s"
 	done
-fi
+
+	break
+done
 
 build_golang_blend() {
 	ts_curr=$(image_ts "${REG}/golang:$2-$1")
