@@ -174,8 +174,10 @@ build_minbase() {
 			hash1=$(tarball_hash_local "$h")
 
 			if [ "${hash0}" = "${hash1}" ] ; then
-				## tags may change even image itself doesn't change 
-				for t in $(chan_tag "${suite}") latest ; do
+				## tags may change even image itself doesn't change
+				tags=$(chan_tag "${suite}")
+				is_latest "${suite}" && tags="${tags} latest"
+				for t in ${tags} ; do
 					hashT=${hash1}
 					if [ -n "$t" ] ; then
 						hashT=$(tarball_hash_remote "${REG}/$1-minbase:$t")
