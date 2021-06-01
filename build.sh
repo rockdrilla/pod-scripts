@@ -249,7 +249,7 @@ while : ; do
 	[ -z "${golang_ver}" ] && break
 
 	t=$(image_ts "${REG}/golang:pure-${golang_ver}" 2>/dev/null)
-	[ "$t" = '0' ] && break
+	[ "$t" != '0' ] && break
 
 	bud "${dir0}/golang/Dockerfile.pure" \
 		-t golang:pure \
