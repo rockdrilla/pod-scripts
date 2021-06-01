@@ -2,7 +2,10 @@
 # (c) 2021, Konstantin Demin
 
 #################################################
-FROM rockdrilla/build-essential:debian-unstable AS base
+FROM rockdrilla/debian-minbase:unstable AS base
+
+RUN /opt/apt.sh install ca-certificates curl dpkg-dev g++
+RUN /opt/cleanup.sh
 
 WORKDIR /tmp
 
