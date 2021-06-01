@@ -24,6 +24,9 @@ RUN /tmp/latest.sh $GOLANG_VERSION /tmp/go.tar.gz
 FROM buildbase AS golang-dist
 
 RUN /opt/apt.sh install golang-go
+RUN /opt/cleanup.sh
+
+COPY --from=buildbase  /tmp/go.tar.gz  /tmp/go.tar.gz
 
 #################################################
 FROM golang-dist AS env-common
@@ -78,8 +81,6 @@ RUN export GOROOT_BOOTSTRAP="/tmp/go" ; \
 
 RUN /opt/cleanup.sh
 
-RUN tar -C / -cf - /go /usr/local/go | tar -C /mnt -xf -
-
 #################################################
 
 FROM scratch
@@ -97,9 +98,10 @@ ENV TMP="/go/tmp"
 ENV TEMPDIR="/go/tmp"
 ENV TEMP="/go/tmp"
 
-WORKDIR /go
+COPY --from=base    /go            /go
+COPY --from=stage2  /usr/local/go  /usr/local/go
 
-COPY --from=stage2  /mnt  /
+WORKDIR /go
 
 ENTRYPOINT [ "/usr/local/go/bin/go" ]
 

@@ -16,8 +16,9 @@ ENV GOCACHE="/go/build"
 
 ENV PATH="/go/bin:/usr/local/go/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
+COPY --from=pure  /go            /go
+COPY --from=pure  /usr/local/go  /usr/local/go
+
 WORKDIR /go
 
 CMD bash
-
-COPY --from=pure  /  /
