@@ -12,7 +12,7 @@ export SOURCE_DATE_EPOCH=$(date -u '+%s')
 distro_info() { "${dir0}/distro-info/tool.sh" "$@" ; }
 distro_chan() { tac | cut -d ',' -f 1 | cut -d ' ' -f 1 | xargs -r ; }
 
-debian_channels='unstable '$(distro_info debian | distro_chan)
+debian_channels=$(distro_info debian | distro_chan)' unstable'
 ubuntu_channels=$(distro_info ubuntu | distro_chan)
 
 ## prepare to work

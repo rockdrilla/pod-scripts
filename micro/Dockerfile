@@ -3,7 +3,7 @@
 
 #################################################
 ARG DISTRO=debian
-ARG SUITE=unstable
+ARG SUITE=latest
 FROM rockdrilla/$DISTRO-minbase:$SUITE AS base
 
 #################################################

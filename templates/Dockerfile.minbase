@@ -2,7 +2,7 @@
 # (c) 2021, Konstantin Demin
 
 ARG DISTRO=debian
-ARG SUITE=unstable
+ARG SUITE=latest
 FROM rockdrilla/$DISTRO-minbase:$SUITE
 
 ## please issue '/opt/cleanup.sh' as last RUN command in your images

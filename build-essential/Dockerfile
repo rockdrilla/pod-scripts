@@ -2,7 +2,7 @@
 # (c) 2021, Konstantin Demin
 
 ARG DISTRO=debian
-ARG SUITE=unstable
+ARG SUITE=latest
 FROM rockdrilla/$DISTRO-minbase:$SUITE
 
 RUN /opt/apt.sh --with-recommends install \
