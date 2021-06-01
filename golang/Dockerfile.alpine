@@ -28,6 +28,6 @@ RUN apk add --no-cache ca-certificates
 COPY --from=pure  /go            /go
 COPY --from=pure  /usr/local/go  /usr/local/go
 
-WORKDIR /go
+WORKDIR /go/src
 
 CMD sh

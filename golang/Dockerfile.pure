@@ -103,7 +103,7 @@ COPY --from=base    /etc/ssl       /etc/ssl
 COPY --from=base    /go            /go
 COPY --from=stage2  /usr/local/go  /usr/local/go
 
-WORKDIR /go
+WORKDIR /go/src
 
 ENTRYPOINT [ "/usr/local/go/bin/go" ]
 
