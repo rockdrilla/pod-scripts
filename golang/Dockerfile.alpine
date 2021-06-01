@@ -23,6 +23,8 @@ ENV TMP="/tmp"
 ENV TEMPDIR="/tmp"
 ENV TEMP="/tmp"
 
+RUN apk add --no-cache ca-certificates
+
 COPY --from=pure  /go            /go
 COPY --from=pure  /usr/local/go  /usr/local/go
 
