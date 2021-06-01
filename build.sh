@@ -251,7 +251,7 @@ golang_ver=$(cat "$t")
 rm -f "$t"
 
 if ! skopeo inspect "${REG}/golang:pure-${golang_ver}" >/dev/null 2>/dev/null ; then
-	bud "${dir0}/golang/pure.Dockerfile" \
+	bud "${dir0}/golang/Dockerfile.pure" \
 		-t golang:pure \
 		${golang_ver:+--build-arg GOLANG_VERSION=${golang_ver}} \
 	"${dir0}/golang"
@@ -278,7 +278,7 @@ build_golang_blend() {
 	[ ${ts_curr} -le ${ts_base} ] && rebuild=1
 	[ ${rebuild} -eq 0 ] && return
 
-	bud "${dir0}/golang/$2.Dockerfile" \
+	bud "${dir0}/golang/Dockerfile.$2" \
 		-t "golang:$2" \
 		--build-arg "GOLANG_VERSION=$1" \
 	"${dir0}/golang"
@@ -292,7 +292,7 @@ build_golang_blend() {
 
 build_golang_blend "${golang_ver}" alpine 'docker://alpine:latest'
 for distro in debian ubuntu ; do
-	## keep in sync with /golang/*.Dockerfile
+	## keep in sync with /golang/Dockerfile.*
 	build_golang_blend "${golang_ver}" "${distro}" "${REG}/${distro}-minbase:latest"
 done
 
