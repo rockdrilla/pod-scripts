@@ -121,17 +121,6 @@ true_tag() {
 	| grep -Fx "$3"
 }
 
-## work
-
-WORKDIR=''
-cleanup
-
-WORKDIR=$(mktemp -d)
-cd "${WORKDIR}"
-
-echo ${debian_channels} | xargs -r -n 1 > debian.chan
-echo ${ubuntu_channels} | xargs -r -n 1 > ubuntu.chan
-
 meta_refill() {
 	while read -r suite ; do
 		r="${suite}"
@@ -155,6 +144,17 @@ meta_refill() {
 meta_query() {
 	grep -E "^$2( |\$)" "$1.meta"
 }
+
+## work
+
+WORKDIR=''
+cleanup
+
+WORKDIR=$(mktemp -d)
+cd "${WORKDIR}"
+
+echo ${debian_channels} | xargs -r -n 1 > debian.chan
+echo ${ubuntu_channels} | xargs -r -n 1 > ubuntu.chan
 
 meta_refill debian
 meta_refill ubuntu
