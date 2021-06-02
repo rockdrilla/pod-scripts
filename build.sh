@@ -171,26 +171,28 @@ build_minbase() {
 		| while IFS='|' read -r h p t ; do
 			c=$(basename "$p")
 
-			hash1=$(tarball_hash_local "$h")
+			if [ -z "${FORCE_REBUILD}" ] ; then
+				hash1=$(tarball_hash_local "$h")
 
-			if [ "${hash0}" = "${hash1}" ] ; then
-				## tags may change even image itself doesn't change
-				tags=$(chan_tag "${suite}")
-				is_latest "${suite}" && tags="${tags} latest"
-				for t in ${tags} ; do
-					hashT=${hash1}
-					if [ -n "$t" ] ; then
-						hashT=$(tarball_hash_remote "${REG}/$1-minbase:$t")
-					fi
+				if [ "${hash0}" = "${hash1}" ] ; then
+					## tags may change even image itself doesn't change
+					tags=$(chan_tag "${suite}")
+					is_latest "${suite}" && tags="${tags} latest"
+					for t in ${tags} ; do
+						hashT=${hash1}
+						if [ -n "$t" ] ; then
+							hashT=$(tarball_hash_remote "${REG}/$1-minbase:$t")
+						fi
 
-					if [ "${hashT}" != "${hash1}" ] ; then
-						image_1_push "$h" "$t" "$c:%s"
-					fi
-				done
+						if [ "${hashT}" != "${hash1}" ] ; then
+							image_1_push "$h" "$t" "$c:%s"
+						fi
+					done
 
-				sed -E -i "/^${suite}/d" "$1.chan"
-				image_rm "$h"
-				continue
+					sed -E -i "/^${suite}/d" "$1.chan"
+					image_rm "$h"
+					continue
+				fi
 			fi
 
 			image_3_push "$h" "$1" "${suite}" "$c:%s"
@@ -249,7 +251,9 @@ while : ; do
 	[ -z "${golang_ver}" ] && break
 
 	t=$(image_ts "${REG}/golang:pure-${golang_ver}" 2>/dev/null)
-	[ "$t" != '0' ] && break
+	if [ -z "${FORCE_REBUILD}" ] ; then
+		[ "$t" != '0' ] && break
+	fi
 
 	bud "${dir0}/golang/Dockerfile.pure" \
 		-t golang:pure \
@@ -273,7 +277,9 @@ build_golang_blend() {
 	rebuild=0
 	[ ${ts_curr} -le ${ts_pure} ] && rebuild=1
 	[ ${ts_curr} -le ${ts_base} ] && rebuild=1
-	[ ${rebuild} -eq 0 ] && return
+	if [ -z "${FORCE_REBUILD}" ] ; then
+		[ ${rebuild} -eq 0 ] && return
+	fi
 
 	bud "${dir0}/golang/Dockerfile.$2" \
 		-t "golang:$2" \
