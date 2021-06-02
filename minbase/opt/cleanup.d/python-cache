@@ -14,12 +14,12 @@ rm -rf /__pycache__ || :
 find / -mindepth 1 -maxdepth 1 -type d -print0 \
 | grep -zEv '^/(sys|proc|dev)$' \
 | sort -zV \
-| xargs -0 -r -I'{}' \
-  find '{}' -mindepth 1 -name '*.pyc' -type f -delete
+| xargs -0 -r -I'^^' \
+  find '^^' -mindepth 1 -name '*.pyc' -type f -delete
 
 find / -mindepth 1 -maxdepth 1 -type d -print0 \
 | grep -zEv '^/(sys|proc|dev)$' \
 | sort -zV \
-| xargs -0 -r -I'{}' \
-  find '{}' -mindepth 1 -name '__pycache__' -type d \
-  -exec rm -rf {} +
+| xargs -0 -r -I'^^' \
+  find '^^' -mindepth 1 -name '__pycache__' -type d \
+  -exec rm -rf '{}' '+'
