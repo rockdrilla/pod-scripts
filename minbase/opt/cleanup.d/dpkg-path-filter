@@ -19,8 +19,8 @@ ex|in)
 	find / -mindepth 1 -maxdepth 1 -type d -print0 \
 	| grep -zEv '^/(sys|proc|dev)$' \
 	| sort -zV \
-	| xargs -0 -r -I'{}' \
-	  find '{}' -mindepth 1 -path "${path_glob}" '!' -type d \
+	| xargs -0 -r -I'^^' \
+	  find '^^' -mindepth 1 -path "${path_glob}" '!' -type d \
 	| sort -V > "${result}"
 
 	exit 0
