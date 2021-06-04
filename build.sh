@@ -241,8 +241,8 @@ build_essential() {
 	done < "$1.chan"
 }
 
-build_essential debian
-build_essential ubuntu
+# build_essential debian
+# build_essential ubuntu
 
 ## build 'golang'
 
