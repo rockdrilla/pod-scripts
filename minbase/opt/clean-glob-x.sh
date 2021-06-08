@@ -52,15 +52,15 @@ test_regex() { sed -En "\\#$1#p" </dev/null ; }
 ## script itself
 
 sysroot_skiplist='^/(sys|proc|dev)$'
-cfg_stanza='^(ex|in)clude=(.+)$'
+cfg_stanza='^(delete|keep)=(.+)$'
 
 ## recursion: turn glob to regex and then into file list 
 ## (symlinks are listed too!)
 case "$1" in
---ex|--in)
+--delete|--keep)
 	set +f
 
-	## $1 - action (ex[clude] / in[clude])
+	## $1 - action (delete / keep)
 	## $2 - path glob (one argument!)
 
 	action="${1#--}"
@@ -115,7 +115,7 @@ if ! [ -r "${conf}" ] ; then
 	exit 1
 fi
 
-## reformat rules them like "--(ex|in)\0selector\0"
+## reformat rules them like "--(delete|keep)\0selector\0"
 trun=$(mktemp)
 grep -E "${cfg_stanza}" \
 < "${conf}" \
@@ -145,33 +145,33 @@ xargs -0 -n 2 -P "${NPROC}" "$0" \
 rm -f "${trun}" ; unset trun
 
 ## merge results to "save list"
-tINclude=$(mktemp)
-find "${tparts}/" -mindepth 1 -name 'in.*' -exec cat '{}' '+' \
-| sort -uV > "${tINclude}"
+tKEEP=$(mktemp)
+find "${tparts}/" -mindepth 1 -name 'keep.*' -exec cat '{}' '+' \
+| sort -uV > "${tKEEP}"
 
 ## merge results to "remove list"
-tEXclude=$(mktemp)
-find "${tparts}/" -mindepth 1 -name 'ex.*' -exec cat '{}' '+' \
-| sort -uV > "${tEXclude}"
+tDELETE=$(mktemp)
+find "${tparts}/" -mindepth 1 -name 'delete.*' -exec cat '{}' '+' \
+| sort -uV > "${tDELETE}"
 
 rm -rf "${tparts}" ; unset tparts
 
 ## nothing to filter at all (again)
-if ! [ -s "${tEXclude}" ] ; then
-	rm -f "${tINclude}" "${tEXclude}"
+if ! [ -s "${tDELETE}" ] ; then
+	rm -f "${tKEEP}" "${tDELETE}"
 	exit 0
 fi
 
 ## filter out files in "save list"
 tremove=$(mktemp)
-if [ -s "${tINclude}" ]
-then grep -Fxv -f "${tINclude}"
+if [ -s "${tKEEP}" ]
+then grep -Fxv -f "${tKEEP}"
 else cat
-fi < "${tEXclude}" \
+fi < "${tDELETE}" \
 | tr '\n' '\0' \
 > "${tremove}"
 
-rm -f "${tINclude}" "${tEXclude}" ; unset tINclude tEXclude
+rm -f "${tKEEP}" "${tDELETE}" ; unset tKEEP tDELETE
 
 ## nothing to filter at all (again?)
 if ! [ -s "${tremove}" ] ; then

@@ -57,6 +57,9 @@ if ! [ -s "${tpath}" ] ; then
 	exit 0
 fi
 
+## reformat stanzas
+sed -E -i 's/^exclude/delete/;s/^include/keep/;' "${tpath}"
+
 ## reformat dpkg's "globs" to "normal glob"
 ## TODO: discover more cases
 sed -E -i 's#(^|/)\*($|/)#\1**\2#g;' "${tpath}"
