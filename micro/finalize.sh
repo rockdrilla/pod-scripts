@@ -90,9 +90,7 @@ rm -rf \
 	/opt/interactive.sh
 
 ## remove empty directories
-/opt/tree-opt.sh /lib
-/opt/tree-opt.sh /usr/lib
-/opt/tree-opt.sh /usr/share
+ZAP=0 /opt/zap-tree.sh /lib /usr/lib /usr/share
 
 ## filesystem usage after wipe
 du -xs /
