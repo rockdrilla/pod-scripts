@@ -58,8 +58,6 @@ cfg_stanza='^(delete|keep)=(.+)$'
 ## (symlinks are listed too!)
 case "$1" in
 --delete|--keep)
-	set +f
-
 	## $1 - action (delete / keep)
 	## $2 - path glob (one argument!)
 
