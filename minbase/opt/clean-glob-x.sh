@@ -136,7 +136,7 @@ fi
 
 tparts=$(mktemp -d)
 
-env TOPMOST_D="$1" RESULT_D="${tparts}" \
+TOPMOST_D="$1" RESULT_D="${tparts}" \
 xargs -0 -n 2 -P "${NPROC}" "$0" \
 < "${trun}"
 
