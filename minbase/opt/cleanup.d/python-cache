@@ -2,24 +2,11 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # (c) 2021, Konstantin Demin
 
-set -e
+set -e -f
 
 [ -z "${VERBOSE}" ] || set -x -v
 
-## topmost root
-find / -maxdepth 1 -name '*.pyc' -type f -delete
-rm -rf /__pycache__ || :
-
-## treewide
-find / -mindepth 1 -maxdepth 1 -type d -print0 \
-| grep -zEv '^/(sys|proc|dev)$' \
-| sort -zV \
-| xargs -0 -r -I'^^' \
-  find '^^' -mindepth 1 -name '*.pyc' -type f -delete
-
-find / -mindepth 1 -maxdepth 1 -type d -print0 \
-| grep -zEv '^/(sys|proc|dev)$' \
-| sort -zV \
-| xargs -0 -r -I'^^' \
-  find '^^' -mindepth 1 -name '__pycache__' -type d \
-  -exec rm -rf '{}' '+'
+XGLOB_DIRS=1 /opt/xglob.sh / <<-EOF
+	delete=**/*.pyc
+	delete=**/__pycache__
+EOF

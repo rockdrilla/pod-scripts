@@ -2,15 +2,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # (c) 2021, Konstantin Demin
 
-set -e
+set -e -f
 
 [ -z "${VERBOSE}" ] || set -x -v
 
 ## truncate files special files
 ## delete other files
-re='^/var/log/(btmp|wtmp|faillog|lastlog|tallylog)$'
 
-find /var/log/ -xdev -regextype egrep \
-  '(' -type f -regex "${re}" -exec truncate -s 0 '{}' '+' ')' \
-  ',' \
-  '(' -type f '!' -regex "${re}" -delete ')'
+/opt/xglob.sh /var/log <<-EOF
+	delete=**
+	keep=btmp
+	keep=wtmp
+	keep=faillog
+	keep=lastlog
+	keep=tallylog
+EOF
+
+find /var/log/ -xdev -type f -exec truncate -s 0 '{}' '+'
