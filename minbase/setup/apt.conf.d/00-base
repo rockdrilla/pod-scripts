@@ -1,7 +1,0 @@
-APT::Sandbox::User "root";
-
-APT::Install-Recommends "false";
-
-Acquire::Languages "none";
-
-aptitude::UI::InfoAreaTabs "true";

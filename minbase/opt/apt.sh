@@ -7,11 +7,10 @@ set -e
 if ! [ -x /usr/bin/aptitude ] ; then
 	## update package lists; may fail sometimes,
 	## e.g. soon-to-release channels like Debian "bullseye" @ 22.04.2021
-	apt update || :
+	apt -qq update || :
 
-	## install apt-utils first, then aptitude
-	apt -y install apt-utils
-	apt -y install aptitude
+	## install apt-utils and aptitude
+	apt -qq -y install apt-utils aptitude
 fi
 
 if [ $# -ne 0 ] ; then

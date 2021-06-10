@@ -7,8 +7,8 @@ set -e
 [ -z "${VERBOSE}" ] || set -x -v
 
 ## remove aptitude and apt-utils (with many thanks)
-apt -y purge aptitude apt-utils
-apt -y autoremove
+apt -qq -y purge aptitude apt-utils
+apt -qq -y autoremove
 rm -rf /var/lib/aptitude
 
 ## remove apt cache and lists

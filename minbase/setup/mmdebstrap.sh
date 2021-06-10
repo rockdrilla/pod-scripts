@@ -4,8 +4,6 @@
 
 set -e
 
-chroot "$1" /opt/cleanup.d/dpkg-path-filter
-
 ## auxiliary packages to be installed
 pkg_aux='lsof ncurses-base procps tzdata vim-tiny whiptail'
 
@@ -83,11 +81,6 @@ chroot "$1" update-alternatives --install ${vim} vim ${vim}.tiny 1
 
 ## run cleanup (aptitude is to be removed)
 chroot "$1" /opt/cleanup.sh
-
-## remove mmdebstrap artifacts
-rm -f \
-  "$1/etc/apt/apt.conf.d/99mmdebstrap" \
-  "$1/etc/dpkg/dpkg.cfg.d/99mmdebstrap"
 
 ## eliminate empty directories under certain paths
 chroot "$1" \
