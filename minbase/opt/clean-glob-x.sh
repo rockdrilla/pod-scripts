@@ -61,12 +61,15 @@ case "$1" in
 	## $1 - action (delete / keep)
 	## $2 - path glob (one argument!)
 
+	if ! printf '%s' "${TOPMOST_D}" | grep -Eq '/$' ; then
+		TOPMOST_D="${TOPMOST_D}/"
+	fi
+
 	action="${1#--}"
 	path_glob="$2"
 
-	x=$(printf '%s' "$2" | cut -c 1)
-	if [ "$x" != '/' ] ; then
-		path_glob="${TOPMOST_D}/${path_glob}"
+	if ! printf '%s' "${path_glob}" | grep -Eq '^/' ; then
+		path_glob="${TOPMOST_D}${path_glob}"
 	fi
 
 	path_regex=$(rx_glob "${path_glob}")
@@ -82,19 +85,32 @@ case "$1" in
 		exit 1
 	fi
 
+	wide_lookup=0
+	if [ "${TOPMOST_D}" = '/' ] ; then
+		wide_lookup=1
+	fi
+	if printf '%s' "${path_glob}" | grep -Eq '^/[^/]*\*' ; then
+		wide_lookup=1
+	fi
+
+	type_selector='! -type d'
+	if [ "${DIRS}" = '1' ] ; then
+		type_selector=''
+	fi
+
 	result=$(mktemp -p "${RESULT_D}" "${action}.XXXXXXXX")
 
-	if [ "$x" = '/' ] ; then
+	if [ "${wide_lookup}" = '1' ] ; then
 		## absolute glob is searched FS-wide
 		find / -mindepth 1 -maxdepth 1 -type d -print0 \
 		| grep -zEv "${sysroot_skiplist}" \
 		| xargs -0 -r -I'^^' \
 		  find '^^' -mindepth 1 -regextype egrep \
-		  -regex "${path_regex}" '!' -type d
+		  -regex "${path_regex}" ${type_selector}
 	else
 		## relative glob is searched under topmost directory
 		find "${TOPMOST_D}" -mindepth 1 -regextype egrep \
-		-regex "${path_regex}" '!' -type d
+		-regex "${path_regex}" ${type_selector}
 	fi > "${result}"
 
 	exit 0
@@ -189,7 +205,7 @@ else
 	if [ -n "${PIPELINE}" ] ; then
 		cat
 	else
-		xargs -0 -r rm -f
+		xargs -0 -r rm -rf
 	fi
 fi < "${tremove}"
 
