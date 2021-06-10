@@ -64,9 +64,9 @@ sed -E -i 's/^exclude/delete/;s/^include/keep/;' "${tpath}"
 ## TODO: discover more cases
 sed -E -i 's#(^|/)\*($|/)#\1**\2#g;' "${tpath}"
 
-## dry-run clean-glob-x.sh to get list of ready-to-delete files
+## dry-run xglob.sh to get list of ready-to-delete files
 tremove=$(mktemp)
-PIPELINE=1 /opt/clean-glob-x.sh / "${tpath}" > "${tremove}"
+XGLOB_PIPE=1 /opt/xglob.sh / "${tpath}" > "${tremove}"
 
 ## nothing to filter at all (again?!)
 if ! [ -s "${tremove}" ] ; then

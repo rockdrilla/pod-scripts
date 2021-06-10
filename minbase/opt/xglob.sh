@@ -94,7 +94,7 @@ case "$1" in
 	fi
 
 	type_selector='! -type d'
-	if [ "${DIRS}" = '1' ] ; then
+	if [ "${XGLOB_DIRS}" = '1' ] ; then
 		type_selector=''
 	fi
 
@@ -194,15 +194,15 @@ if ! [ -s "${tremove}" ] ; then
 fi
 
 ## remove files already!
-## ... or not if env DRY is not empty :)
-if [ -n "${DRY}" ] ; then
+## ... or not if env XGLOB_DRY is not empty :)
+if [ -n "${XGLOB_DRY}" ] ; then
 	cat <<-EOF
-	## ENV DRY=${DRY} was specified, no files are removed!
+	## ENV XGLOB_DRY=${XGLOB_DRY} was specified, no files are removed!
 	matched files:
 	EOF
 	tr '\0' '\n'
 else
-	if [ -n "${PIPELINE}" ] ; then
+	if [ -n "${XGLOB_PIPE}" ] ; then
 		cat
 	else
 		xargs -0 -r rm -rf
