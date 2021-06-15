@@ -68,18 +68,19 @@ function join(A, sep,     n, r, i) {
 			L[i] = 0;
 			continue;
 		}
+		## process all dates except "released" normally
 		if (i != 3) {
 			L[i] = (now >= L[i]) ? 1 : 0;
 			continue;
 		}
+		## process "released" normally if it was before "now"
 		if (now >= L[i]) {
 			L[i] = 1;
 			continue;
 		}
-		## Ubuntu specific:
-		## mark channel as "released" when it's less than month
+		## mark channel as "released" when it's less than 2 months
 		## before actual release
-		if ((L[i] - now) < 100) {
+		if ((L[i] - now) < 200) {
 			L[1] = 0;
 			L[i] = 1;
 		} else {
